@@ -8,6 +8,137 @@
     <script type="module" src="/src/main.ts" defer></script>
   </head>
   <body>
-    <div id="merlin" data-tauri-drag-region>Merlin goes here</div>
+    <main id="stage" class="mood-idle">
+      <svg
+        id="merlin"
+        viewBox="-30 -70 260 294"
+        role="img"
+        aria-label="Merlin, a floating skull crowned with cyan fire"
+      >
+        <defs>
+          <!-- Wobbles the fire's edges like rising heat -->
+          <filter id="fire-flow" x="-20%" y="-30%" width="140%" height="150%">
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency="0.03 0.11"
+              numOctaves="2"
+              seed="4"
+              result="noise"
+            >
+              <animate
+                attributeName="baseFrequency"
+                dur="3s"
+                values="0.03 0.11;0.036 0.14;0.03 0.11"
+                repeatCount="indefinite"
+              />
+            </feTurbulence>
+            <feDisplacementMap
+              in="SourceGraphic"
+              in2="noise"
+              scale="5"
+              xChannelSelector="R"
+              yChannelSelector="G"
+            />
+          </filter>
+          <!-- Fire is hottest (palest) at the base -->
+          <linearGradient id="fire-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#1597BE" />
+            <stop offset="0.55" stop-color="#2EC4D6" />
+            <stop offset="1" stop-color="#8BE9F3" />
+          </linearGradient>
+          <linearGradient id="inner-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#8BE9F3" />
+            <stop offset="1" stop-color="#F4FEFF" />
+          </linearGradient>
+        </defs>
+
+        <ellipse
+          class="shadow"
+          cx="100"
+          cy="200"
+          rx="40"
+          ry="5"
+          fill="#14213D"
+          opacity="0.14"
+        />
+
+        <g class="float">
+          <!-- Fire: filled in by fire.ts -->
+          <g class="lean">
+            <g class="fire" id="fire-outer" filter="url(#fire-flow)"></g>
+            <g id="sparks"></g>
+            <g class="fire-inner" id="fire-inner" filter="url(#fire-flow)"></g>
+          </g>
+
+          <!-- Skull -->
+          <path
+            class="cranium"
+            d="M52 106 Q46 54 100 48 Q154 54 148 106 Q148 124 132 130 L128 142 L72 142 L68 130 Q52 124 52 106 Z"
+            fill="#F1EDE3"
+            stroke="#14213D"
+            stroke-width="3.5"
+            stroke-linejoin="round"
+          />
+          <path
+            class="crack"
+            d="M120 58 L113 72 L121 78"
+            fill="none"
+            stroke="#14213D"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+
+          <!-- Eye sockets and glowing pupils -->
+          <ellipse cx="78" cy="102" rx="16" ry="18" fill="#14213D" />
+          <ellipse cx="122" cy="102" rx="16" ry="18" fill="#14213D" />
+          <g class="eyes">
+            <g class="pupil pupil-l">
+              <circle cx="80" cy="106" r="5.5" fill="#2EC4D6" />
+            </g>
+            <g class="pupil pupil-r">
+              <circle cx="120" cy="106" r="5.5" fill="#2EC4D6" />
+            </g>
+          </g>
+
+          <!-- Nose and upper teeth (with the chipped one) -->
+          <path d="M95 120 L105 120 L100 128 Z" fill="#14213D" />
+          <g
+            class="teeth"
+            stroke="#14213D"
+            stroke-width="2.5"
+            stroke-linecap="round"
+          >
+            <line x1="84" y1="133" x2="84" y2="142" />
+            <line x1="92" y1="132" x2="92" y2="142" />
+            <line x1="100" y1="132" x2="100" y2="142" />
+            <line x1="108" y1="132" x2="108" y2="142" />
+            <line x1="116" y1="133" x2="116" y2="142" />
+          </g>
+          <path
+            class="chip"
+            d="M109.5 143 L116 143 L116 136.5 L113.5 138.5 Z"
+            fill="#14213D"
+          />
+
+          <!-- Jaw: separate so he can talk and chatter -->
+          <g class="jaw">
+            <path
+              d="M72 142 L128 142 Q131 162 116 168 L84 168 Q69 162 72 142 Z"
+              fill="#F1EDE3"
+              stroke="#14213D"
+              stroke-width="3.5"
+              stroke-linejoin="round"
+            />
+            <g stroke="#14213D" stroke-width="2.5" stroke-linecap="round">
+              <line x1="86" y1="142" x2="86" y2="152" />
+              <line x1="95" y1="142" x2="95" y2="153" />
+              <line x1="105" y1="142" x2="105" y2="153" />
+              <line x1="114" y1="142" x2="114" y2="152" />
+            </g>
+          </g>
+        </g>
+      </svg>
+    </main>
   </body>
 </html>
