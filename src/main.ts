@@ -1,22 +1,20 @@
-import { getCurrentWindow } from "@tauri-apps/api/window";
 import { buildFire } from "./fire";
 import { setMood, type Mood } from "./mood";
 import { initEmotes } from "./emotes";
 import { summon, despawn, resummon } from "./lifecycle";
+import { initDrag } from "./drag";
 
 buildFire();
 initEmotes();
 summon();
 
-// Hold left click anywhere on Merlin to move his window around.
-// (Later we'll swap this for our own drag so we can throw him.)
-const stage = document.querySelector<HTMLElement>("#stage")!;
-stage.addEventListener("mousedown", (event) => {
-  if (event.button === 0) getCurrentWindow().startDragging();
+// Drag Merlin around, or fling him. A plain click will open chat later.
+initDrag(() => {
+  // TODO: open the chat bubble
 });
 
 // Dev only: click Merlin, then press 1–7 to preview his moods,
-// or 9 to despawn him and summon him back.
+// 8 to make him dizzy, or 9 to despawn and summon him again.
 if (import.meta.env.DEV) {
   const preview: Mood[] = [
     "idle",
