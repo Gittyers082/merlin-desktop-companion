@@ -1,4 +1,5 @@
 mod brain;
+mod keys;
 mod music;
 mod pc;
 
@@ -12,7 +13,12 @@ pub fn run() {
             pc::start(app.handle().clone());
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![brain::chat])
+        .invoke_handler(tauri::generate_handler![
+            brain::chat,
+            keys::save_claude_key,
+            keys::has_claude_key,
+            keys::delete_claude_key
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
