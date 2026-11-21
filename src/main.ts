@@ -26,6 +26,7 @@ if (import.meta.env.DEV) {
     "confused",
     "happy",
     "raging",
+    "dizzy",
   ];
   window.addEventListener("keydown", async (event) => {
     if (event.key === "9") {

@@ -112,6 +112,31 @@
         />
 
         <g class="float">
+          <!-- Stars that circle his head when he's dizzy -->
+          <g class="stars">
+            <g class="flat" transform="translate(100 -26) scale(1 0.4)">
+              <g
+                class="stars-spin"
+                fill="#2EC4D6"
+                stroke="#14213D"
+                stroke-width="2"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M38 -7 L40 -2 L45 0 L40 2 L38 7 L36 2 L31 0 L36 -2 Z"
+                />
+                <path
+                  d="M-38 -7 L-36 -2 L-31 0 L-36 2 L-38 7 L-40 2 L-45 0 L-40 -2 Z"
+                />
+                <path
+                  d="M0 31 L2 36 L7 38 L2 40 L0 45 L-2 40 L-7 38 L-2 36 Z"
+                />
+                <path
+                  d="M0 -45 L2 -40 L7 -38 L2 -36 L0 -31 L-2 -36 L-7 -38 L-2 -40 Z"
+                />
+              </g>
+            </g>
+          </g>
           <!-- Fire: filled in by fire.ts -->
           <g class="lean">
             <g class="fire" id="fire-outer" filter="url(#fire-flow)"></g>
