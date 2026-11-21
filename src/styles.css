@@ -1181,3 +1181,42 @@ body {
 .chat-form input:focus {
   border-color: #0b6e7c;
 }
+
+/* ---------- Talking: jaw flaps in uneven, speech-like beats ---------- */
+
+.mood-talking .float {
+  animation: float 2.4s ease-in-out infinite;
+}
+.mood-talking .jaw {
+  animation: talk 1.1s steps(1, end) infinite;
+}
+.mood-talking .pupil {
+  animation: pulse 1.1s ease-in-out infinite;
+}
+
+@keyframes talk {
+  0% {
+    transform: translateY(9px);
+  }
+  14% {
+    transform: translateY(2px);
+  }
+  26% {
+    transform: translateY(12px);
+  }
+  40% {
+    transform: translateY(0);
+  }
+  52% {
+    transform: translateY(7px);
+  }
+  66% {
+    transform: translateY(3px);
+  }
+  78% {
+    transform: translateY(10px);
+  }
+  90% {
+    transform: translateY(0);
+  }
+}
