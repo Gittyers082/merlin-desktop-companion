@@ -7,7 +7,7 @@ import { initCursorWatch } from "./cursor";
 import { initContextMenu } from "./menu";
 import { initTray } from "./tray";
 import { initChat } from "./chat";
-import { initSenses } from "./senses";
+import { initSenses, pauseSenses } from "./senses";
 
 buildFire();
 initEmotes();
@@ -49,6 +49,9 @@ if (import.meta.env.DEV) {
       return;
     }
     const mood = preview[Number(event.key) - 1];
-    if (mood) setMood(mood);
+    if (mood) {
+      pauseSenses(15000); // let the preview play for 15s before the senses take over
+      setMood(mood);
+    }
   });
 }
