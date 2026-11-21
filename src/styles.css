@@ -24,3 +24,137 @@ body {
   height: 100%;
   overflow: visible;
 }
+
+/* ---------- Animation setup ---------- */
+
+/* Make every part transform around its own box, not the whole SVG. */
+#merlin * {
+  transform-box: fill-box;
+}
+
+.float {
+  transform-origin: 50% 50%;
+}
+.fire,
+.fire-inner {
+  transform-origin: 50% 100%;
+}
+.jaw {
+  transform-origin: 50% 0%;
+}
+.pupil,
+.shadow,
+.spark {
+  transform-origin: 50% 50%;
+}
+
+/* ---------- Idle (default state) ---------- */
+
+.float {
+  animation: float 3.4s ease-in-out infinite;
+}
+.shadow {
+  animation: shadow 3.4s ease-in-out infinite;
+}
+.fire {
+  animation: flicker 1.2s ease-in-out infinite;
+}
+.fire-inner {
+  animation: flicker 0.9s ease-in-out infinite reverse;
+}
+.jaw {
+  animation: jaw-twitch 4s ease-in-out infinite;
+}
+.pupil {
+  animation: pulse 2.2s ease-in-out infinite;
+}
+
+.spark {
+  opacity: 0;
+  filter: drop-shadow(0 0 2px rgba(46, 196, 214, 0.9));
+  animation: spark 1.6s ease-out infinite;
+}
+
+/* ---------- Keyframes ---------- */
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-9px);
+  }
+}
+
+/* The shadow shrinks and fades as he floats up. */
+@keyframes shadow {
+  0%,
+  100% {
+    transform: scaleX(1);
+    opacity: 0.14;
+  }
+  50% {
+    transform: scaleX(0.85);
+    opacity: 0.08;
+  }
+}
+
+@keyframes flicker {
+  0%,
+  100% {
+    transform: scaleY(1) skewX(0);
+  }
+  33% {
+    transform: scaleY(1.03) skewX(-1.5deg);
+  }
+  66% {
+    transform: scaleY(0.98) skewX(1.5deg);
+  }
+}
+
+@keyframes jaw-twitch {
+  0%,
+  88%,
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+  92% {
+    transform: translateY(6px) rotate(3deg);
+  }
+  96% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.25);
+  }
+}
+
+/* Each spark gets its own duration, delay and drift (--dx) from fire.ts. */
+@keyframes spark {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.6);
+  }
+  12% {
+    opacity: 1;
+    transform: translate(0, -6px) scale(1.2);
+  }
+  35% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--dx), -60px) scale(0.2);
+  }
+}
