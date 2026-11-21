@@ -885,3 +885,102 @@ body {
     opacity: 0;
   }
 }
+
+/* ---------- Despawn: circle returns → fire snuffs out → he sinks into it ---------- */
+
+.mood-despawn .magic-circle {
+  animation: circle-out 2.4s ease-in-out both;
+}
+.mood-despawn .circle-spin {
+  animation-duration: 2.4s;
+}
+.mood-despawn .circle-draw {
+  stroke-dasharray: 380;
+  animation: draw-out 2.4s ease-out both;
+}
+.mood-despawn .fire,
+.mood-despawn .fire-inner {
+  animation: snuff 2.4s ease-in both;
+}
+.mood-despawn .float {
+  animation: sink-away 2.4s ease-in both;
+}
+.mood-despawn .shadow {
+  animation: shadow-out 2.4s ease-in both;
+}
+.mood-despawn .spark {
+  animation: none;
+  opacity: 0;
+}
+
+@keyframes circle-out {
+  0% {
+    transform: scale(0.1);
+    opacity: 0;
+  }
+  15% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  22%,
+  75% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.2);
+    opacity: 0;
+  }
+}
+
+@keyframes draw-out {
+  0% {
+    stroke-dashoffset: 380;
+  }
+  22%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes snuff {
+  0%,
+  25% {
+    transform: scale(1, 1);
+  }
+  33% {
+    transform: scale(1.1, 1.25);
+  }
+  45%,
+  100% {
+    transform: scale(0, 0);
+  }
+}
+
+@keyframes sink-away {
+  0%,
+  45% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  52% {
+    transform: translateY(-8px) scale(1.06, 0.94);
+    opacity: 1;
+  }
+  75%,
+  100% {
+    transform: translateY(70px) scale(0.2, 0.05);
+    opacity: 0;
+  }
+}
+
+@keyframes shadow-out {
+  0%,
+  50% {
+    transform: scale(1);
+  }
+  75%,
+  100% {
+    transform: scale(0);
+  }
+}
