@@ -6,6 +6,7 @@ import { Menu } from "@tauri-apps/api/menu";
 import { defaultWindowIcon } from "@tauri-apps/api/app";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { despawn, resummon, quit } from "./lifecycle";
+import { openSettings } from "./open-settings";
 
 // Keep a reference so the tray icon isn't garbage-collected.
 let tray: TrayIcon | undefined;
@@ -26,6 +27,7 @@ async function toggle(): Promise<void> {
 export async function initTray(): Promise<void> {
   const menu = await Menu.new({
     items: [
+      { id: "settings", text: "Settings…", action: () => void openSettings() },
       { id: "toggle", text: "Summon / send away", action: () => void toggle() },
       { item: "Separator" },
       { id: "quit", text: "Quit Merlin", action: () => void quit() },

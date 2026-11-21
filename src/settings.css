@@ -1,0 +1,206 @@
+/* Merlin's Settings window: same ink-and-cyan comic style as Merlin. */
+
+:root {
+  --ink: #14213d;
+  --muted: #4a5670;
+  --cyan: #2ec4d6;
+  --cyan-dark: #0b6e7c;
+  --paper: #ffffff;
+  --page: #f5f7fa;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font:
+    14px/1.45 "Segoe UI",
+    system-ui,
+    sans-serif;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 22px;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+header p {
+  margin: 2px 0 0;
+  color: var(--muted);
+}
+
+section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 18px;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 14px;
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+h2 {
+  margin: 0 0 2px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+label {
+  cursor: pointer;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+  font-weight: 600;
+}
+
+.choice {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-left: 28px;
+}
+
+.hint {
+  display: block;
+  padding-left: 24px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.slider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: 28px;
+}
+
+.slider input {
+  flex: 1;
+}
+
+output {
+  min-width: 52px;
+  text-align: right;
+  font-weight: 700;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-weight: 600;
+}
+
+input[type="checkbox"],
+input[type="radio"],
+input[type="range"] {
+  accent-color: var(--cyan-dark);
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+input[type="text"],
+input[type="password"],
+select {
+  height: 38px;
+  padding: 0 12px;
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--ink);
+  font:
+    500 14px "Segoe UI",
+    system-ui,
+    sans-serif;
+}
+
+input:focus-visible,
+select:focus-visible,
+button:focus-visible {
+  outline: 3px solid var(--cyan);
+  outline-offset: 2px;
+}
+
+.key-row {
+  display: flex;
+  gap: 8px;
+}
+
+.key-row input {
+  flex: 1;
+  min-width: 0;
+}
+
+button {
+  min-height: 38px;
+  padding: 0 14px;
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  background: var(--cyan);
+  color: var(--ink);
+  font:
+    700 14px "Segoe UI",
+    system-ui,
+    sans-serif;
+  box-shadow: 2px 2px 0 var(--ink);
+  cursor: pointer;
+}
+
+button:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+
+button.link {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  color: var(--cyan-dark);
+  text-decoration: underline;
+}
+
+.key-status {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* Show only the settings for the chosen brain. */
+form[data-provider="ollama"] .only-claude,
+form[data-provider="claude"] .only-ollama {
+  display: none;
+}
+
+.only-ollama,
+.only-claude {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}

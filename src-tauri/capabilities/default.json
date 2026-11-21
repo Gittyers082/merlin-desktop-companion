@@ -13,6 +13,8 @@
     "core:window:allow-current-monitor",
     "core:window:allow-set-ignore-cursor-events",
     "process:default",
-    "core:app:allow-default-window-icon"
+    "core:app:allow-default-window-icon",
+    "core:window:allow-set-focus",
+    "core:window:allow-unminimize"
   ]
 }

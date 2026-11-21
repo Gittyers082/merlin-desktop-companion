@@ -39,5 +39,30 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
-  }
+  },
+  "windows": [
+    {
+      "label": "main",
+      "title": "Merlin",
+      "width": 420,
+      "height": 480,
+      "transparent": true,
+      "decorations": false,
+      "alwaysOnTop": true,
+      "skipTaskbar": true,
+      "resizable": false,
+      "shadow": false,
+      "center": true
+    },
+    {
+      "label": "settings",
+      "title": "Merlin — Settings",
+      "url": "settings.html",
+      "width": 460,
+      "height": 720,
+      "resizable": false,
+      "visible": false,
+      "center": true
+    }
+  ]
 }

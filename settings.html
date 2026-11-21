@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Merlin — Settings</title>
+    <link rel="stylesheet" href="/src/settings.css" />
+    <script type="module" src="/src/settings-page.ts" defer></script>
+  </head>
+  <body>
+    <form id="settings" data-provider="ollama">
+      <header>
+        <h1>Merlin's grimoire</h1>
+        <p>Changes save as you make them.</p>
+      </header>
+
+      <section>
+        <h2>Senses</h2>
+
+        <label class="toggle"
+          ><input type="checkbox" name="music" /> Vibe when music plays</label
+        >
+        <div class="choice">
+          <label>
+            <input type="radio" name="musicSource" value="music-apps" /> Music
+            apps only
+            <span class="hint"
+              >Ignores browsers, so YouTube videos won't count</span
+            >
+          </label>
+          <label
+            ><input type="radio" name="musicSource" value="anything" /> Anything
+            playing</label
+          >
+        </div>
+
+        <label class="toggle"
+          ><input type="checkbox" name="sleep" /> Fall asleep when I'm
+          away</label
+        >
+        <label class="slider">
+          After
+          <input type="range" name="sleepAfterMin" min="1" max="30" step="1" />
+          <output id="sleep-value"></output>
+        </label>
+
+        <label class="toggle"
+          ><input type="checkbox" name="rage" /> Rage when my CPU is
+          maxed</label
+        >
+        <label class="slider">
+          At <input type="range" name="rageCpu" min="60" max="100" step="5" />
+          <output id="rage-value"></output>
+        </label>
+      </section>
+
+      <section>
+        <h2>Brain</h2>
+
+        <div class="choice">
+          <label>
+            <input type="radio" name="provider" value="ollama" /> Ollama
+            <span class="hint">Runs on your PC, free</span>
+          </label>
+          <label>
+            <input type="radio" name="provider" value="claude" /> Claude API
+            <span class="hint">Smarter, needs an API key (pay as you go)</span>
+          </label>
+        </div>
+
+        <div class="only-ollama">
+          <label class="field">
+            Ollama model
+            <input type="text" name="ollamaModel" spellcheck="false" />
+          </label>
+        </div>
+
+        <div class="only-claude">
+          <label class="field">
+            Claude model
+            <select name="claudeModel">
+              <option value="claude-haiku-5-5">
+                Claude Haiku 5.5 (fastest, cheapest)
+              </option>
+              <option value="claude-sonnet-5-5">Claude Sonnet 5.5</option>
+              <option value="claude-opus-5-5">
+                Claude Opus 5.5 (smartest)
+              </option>
+            </select>
+          </label>
+          <label class="field">
+            API key
+            <span class="key-row">
+              <input
+                id="claude-key"
+                type="password"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="sk-ant-…"
+              />
+              <button type="button" id="save-key">Save key</button>
+            </span>
+          </label>
+          <p class="key-status">
+            <span id="key-status"></span>
+            <button type="button" id="remove-key" class="link" hidden>
+              Remove
+            </button>
+          </p>
+        </div>
+      </section>
+    </form>
+  </body>
+</html>
