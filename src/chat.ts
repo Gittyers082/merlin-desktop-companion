@@ -18,6 +18,7 @@ const HISTORY_LIMIT = 12;
 /** How long his reply stays up after he finishes speaking. */
 const READ_MS_PER_CHAR = 45;
 const MIN_READ_MS = 3500;
+const INPUT_IDLE_MS = 10000;
 
 export interface ChatControl {
   open(): void;
@@ -31,14 +32,25 @@ export function initChat(): ChatControl {
   const history: ChatMessage[] = [];
   let busy = false;
   let hideTimer = 0;
+  let idleTimer = 0;
+
+  /** (Re)starts the countdown that closes an untouched input box. */
+  const armIdle = () => {
+    clearTimeout(idleTimer);
+    idleTimer = window.setTimeout(() => {
+      if (!input.value.trim()) close();
+    }, INPUT_IDLE_MS);
+  };
 
   const open = () => {
     if (busy) return;
     form.classList.add("show");
     input.focus();
+    armIdle();
   };
 
   const close = () => {
+    clearTimeout(idleTimer);
     form.classList.remove("show");
     input.value = "";
     input.blur();
@@ -109,6 +121,11 @@ export function initChat(): ChatControl {
 
   input.addEventListener("keydown", (event) => {
     if (event.key === "Escape") close();
+  });
+
+  input.addEventListener("input", armIdle);
+  input.addEventListener("blur", () => {
+    if (form.classList.contains("show") && !input.value.trim()) close();
   });
 
   form.addEventListener("submit", (event) => {

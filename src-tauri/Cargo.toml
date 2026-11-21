@@ -34,3 +34,6 @@ lto = true
 opt-level = 3
 panic = "abort"
 strip = true
+
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.62", features = ["Media_Control", "Foundation", "Foundation_Collections"] }
