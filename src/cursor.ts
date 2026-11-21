@@ -31,7 +31,11 @@ export function initCursorWatch(isBusy: () => boolean): void {
     if (x < 0 || y < 0 || x > window.innerWidth || y > window.innerHeight)
       return false;
     const hit = document.elementFromPoint(x, y);
-    return hit !== null && hit !== svg && svg.contains(hit);
+    return (
+      hit !== null &&
+      hit !== svg &&
+      (svg.contains(hit) || hit.closest("[data-interactive]") !== null)
+    );
   };
 
   const tick = async () => {
