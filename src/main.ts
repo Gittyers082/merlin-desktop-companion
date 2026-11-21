@@ -1,8 +1,10 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { buildFire } from "./fire";
 import { setMood, type Mood } from "./mood";
+import { initEmotes } from "./emotes";
 
 buildFire();
+initEmotes();
 
 // Hold left click anywhere on Merlin to move his window around.
 // (Later we'll swap this for our own drag so we can throw him.)
