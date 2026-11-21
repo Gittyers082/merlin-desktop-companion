@@ -9,6 +9,7 @@ import {
   saveSettings,
   type Settings,
 } from "./settings";
+import { enable, disable, isEnabled } from "@tauri-apps/plugin-autostart";
 
 const form = document.querySelector<HTMLFormElement>("#settings")!;
 const sleepLabel = document.querySelector<HTMLElement>("#sleep-value")!;
@@ -110,4 +111,12 @@ const win = getCurrentWindow();
 win.onCloseRequested(async (event) => {
   event.preventDefault();
   await win.hide();
+});
+
+// "Start with Windows" lives in Windows itself, not in our settings.
+const autostart = document.querySelector<HTMLInputElement>("#autostart")!;
+isEnabled().then((enabled) => (autostart.checked = enabled));
+autostart.addEventListener("change", async () => {
+  if (autostart.checked) await enable();
+  else await disable();
 });

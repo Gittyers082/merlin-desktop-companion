@@ -134,7 +134,9 @@ async fn ask_ollama(
         if let Some(message) = chunk.message {
             if !message.content.is_empty() {
                 on_event
-                    .send(ChatEvent::Token { text: message.content })
+                    .send(ChatEvent::Token {
+                        text: message.content,
+                    })
                     .map_err(|e| e.to_string())?;
             }
         }
@@ -194,12 +196,15 @@ async fn ask_claude(
         let Some(data) = line.strip_prefix("data:") else {
             return Ok(false); // "event: …" lines; the data line says it all
         };
-        let event: serde_json::Value = serde_json::from_str(data.trim()).map_err(|e| e.to_string())?;
+        let event: serde_json::Value =
+            serde_json::from_str(data.trim()).map_err(|e| e.to_string())?;
         match event["type"].as_str() {
             Some("content_block_delta") => {
                 if let Some(text) = event["delta"]["text"].as_str() {
                     on_event
-                        .send(ChatEvent::Token { text: text.to_string() })
+                        .send(ChatEvent::Token {
+                            text: text.to_string(),
+                        })
                         .map_err(|e| e.to_string())?;
                 }
                 Ok(false)

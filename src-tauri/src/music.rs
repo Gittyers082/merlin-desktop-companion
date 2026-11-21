@@ -19,8 +19,8 @@ pub struct NowPlaying {
 #[cfg(windows)]
 pub fn start(app: AppHandle) {
     use std::time::Duration;
-    use tauri::async_runtime::block_on;
     use tauri::Emitter;
+    use tauri::async_runtime::block_on;
     use windows::Media::Control::{
         GlobalSystemMediaTransportControlsSessionManager as SessionManager,
         GlobalSystemMediaTransportControlsSessionPlaybackStatus as PlaybackStatus,
