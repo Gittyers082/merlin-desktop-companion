@@ -228,6 +228,20 @@
         <span class="zz z2">z</span>
         <span class="zz z3">Z</span>
       </div>
+      <!-- Chat: Merlin's speech bubble and the box you type in -->
+      <div class="chat" data-interactive>
+        <p id="speech" class="speech" aria-live="polite"></p>
+        <form id="chat-form" class="chat-form">
+          <input
+            id="chat-input"
+            type="text"
+            autocomplete="off"
+            maxlength="500"
+            placeholder="Speak, apprentice…"
+            aria-label="Message Merlin"
+          />
+        </form>
+      </div>
     </main>
   </body>
 </html>

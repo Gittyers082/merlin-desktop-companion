@@ -1108,3 +1108,76 @@ body {
 #sparks {
   pointer-events: none;
 }
+
+/* ---------- Chat: speech bubble and input ---------- */
+
+.chat {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  color: #14213d;
+}
+
+.speech {
+  position: absolute;
+  top: 6px;
+  left: 14px;
+  right: 14px;
+  margin: 0;
+  max-height: 150px;
+  overflow-y: auto;
+  padding: 12px 14px;
+  background: #ffffff;
+  border: 3px solid #14213d;
+  border-radius: 16px;
+  box-shadow: 4px 4px 0 #14213d;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.45;
+  display: none;
+  pointer-events: auto;
+  transform-origin: 50% 100%;
+  z-index: 10;
+}
+
+.speech.show {
+  display: block;
+  animation: pop 0.45s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+
+.chat-form {
+  position: absolute;
+  left: 50px;
+  right: 50px;
+  bottom: 6px;
+  display: none;
+  pointer-events: auto;
+  z-index: 10;
+}
+
+.chat-form.show {
+  display: block;
+  animation: pop 0.3s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+
+.chat-form input {
+  width: 100%;
+  height: 38px;
+  box-sizing: border-box;
+  padding: 0 14px;
+  border: 3px solid #14213d;
+  border-radius: 19px;
+  background: #ffffff;
+  color: #14213d;
+  font:
+    500 14px "Segoe UI",
+    system-ui,
+    sans-serif;
+  box-shadow: 3px 3px 0 #14213d;
+  outline: none;
+}
+
+.chat-form input:focus {
+  border-color: #0b6e7c;
+}

@@ -91,6 +91,7 @@ export function initDrag(onClick: () => void): DragControl {
 
   stage.addEventListener("pointerdown", (event) => {
     if (event.button !== 0) return;
+    if ((event.target as Element).closest("[data-interactive]")) return; // clicks in the chat box aren't drags
     stage.setPointerCapture(event.pointerId);
     cancelAnimationFrame(flight);
     clearTimeout(dizzyTimer);

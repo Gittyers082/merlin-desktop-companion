@@ -6,18 +6,23 @@ import { initDrag } from "./drag";
 import { initCursorWatch } from "./cursor";
 import { initContextMenu } from "./menu";
 import { initTray } from "./tray";
+import { initChat } from "./chat";
 
 buildFire();
 initEmotes();
 summon();
 
-const openChat = () => {
-  // TODO: open the chat bubble
-};
+// Click Merlin (or pick "Talk to Merlin") to chat.
+const chat = initChat();
+const openChat = () => chat.open();
 
+// Drag Merlin around, or fling him. A plain click opens chat.
 const drag = initDrag(openChat);
 
+// Eyes follow your cursor; clicks pass through the space around him.
 initCursorWatch(drag.isBusy);
+
+// Right-click menu and system tray icon.
 initContextMenu(openChat);
 initTray();
 
@@ -35,6 +40,7 @@ if (import.meta.env.DEV) {
     "dizzy",
   ];
   window.addEventListener("keydown", async (event) => {
+    if (event.target instanceof HTMLInputElement) return; // typing to Merlin, not testing
     if (event.key === "9") {
       await despawn();
       setTimeout(resummon, 800);
