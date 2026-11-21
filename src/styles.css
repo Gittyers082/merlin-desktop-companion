@@ -667,3 +667,221 @@ body {
     transform: translateY(-48px);
   }
 }
+
+/* ---------- Summon: magic circle → beam → Merlin pops in → fire ignites ---------- */
+
+/* The circle's flattening transform must use plain SVG coordinates. */
+#merlin .flat {
+  transform-box: view-box;
+  transform-origin: 0 0;
+}
+
+.magic-circle,
+.beam,
+.rise,
+.ring {
+  opacity: 0;
+}
+
+.magic-circle {
+  transform-origin: 50% 50%;
+  filter: drop-shadow(0 0 6px rgba(46, 196, 214, 0.8));
+}
+.circle-spin {
+  transform-origin: 50% 50%;
+  animation: spin 6s linear infinite;
+}
+.beam {
+  transform-origin: 50% 100%;
+}
+.ring {
+  transform-origin: 50% 50%;
+}
+
+.mood-summon .magic-circle {
+  animation: circle-in 3.6s ease-in-out both;
+}
+.mood-summon .circle-spin {
+  animation-duration: 2.4s;
+}
+.mood-summon .circle-draw {
+  stroke-dasharray: 380;
+  animation: draw 3.6s ease-out both;
+}
+.mood-summon .beam {
+  animation: beam 3.6s ease-out both;
+}
+.mood-summon .rise {
+  animation: rise-up 3.6s ease-out both;
+}
+.mood-summon .r2 {
+  animation-delay: 0.15s;
+}
+.mood-summon .r3 {
+  animation-delay: 0.3s;
+}
+.mood-summon .r4 {
+  animation-delay: 0.45s;
+}
+.mood-summon .float {
+  animation: summon-pop 3.6s cubic-bezier(0.3, 1.3, 0.5, 1) both;
+}
+.mood-summon .shadow {
+  animation: shadow-in 3.6s ease-out both;
+}
+.mood-summon .fire,
+.mood-summon .fire-inner {
+  animation: ignite 3.6s ease-out both;
+}
+.mood-summon .ring {
+  animation: ring 3.6s ease-out both;
+}
+.mood-summon .spark {
+  animation: none;
+  opacity: 0;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes circle-in {
+  0% {
+    transform: scale(0.1);
+    opacity: 0;
+  }
+  12% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+  18% {
+    transform: scale(1);
+  }
+  62% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  80%,
+  100% {
+    transform: scale(1.25);
+    opacity: 0;
+  }
+}
+
+@keyframes draw {
+  0% {
+    stroke-dashoffset: 380;
+  }
+  20%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes beam {
+  0%,
+  16% {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+  28% {
+    transform: scaleY(1);
+    opacity: 0.9;
+  }
+  42% {
+    opacity: 0.7;
+  }
+  56%,
+  100% {
+    transform: scaleY(1.05);
+    opacity: 0;
+  }
+}
+
+@keyframes rise-up {
+  0%,
+  14% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    transform: translateY(-120px);
+    opacity: 0;
+  }
+}
+
+@keyframes summon-pop {
+  0%,
+  28% {
+    transform: translateY(-10px) scale(0.2);
+    opacity: 0;
+  }
+  34% {
+    opacity: 1;
+  }
+  42% {
+    transform: translateY(-6px) scale(1.14);
+    opacity: 1;
+  }
+  49% {
+    transform: translateY(2px) scale(0.94, 1.04);
+  }
+  56%,
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes shadow-in {
+  0%,
+  30% {
+    transform: scale(0);
+  }
+  44% {
+    transform: scale(1.15);
+  }
+  52%,
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes ignite {
+  0%,
+  40% {
+    transform: scale(0, 0);
+  }
+  50% {
+    transform: scale(1.15, 1.4);
+  }
+  58% {
+    transform: scale(0.95, 0.9);
+  }
+  64%,
+  100% {
+    transform: scale(1, 1);
+  }
+}
+
+@keyframes ring {
+  0%,
+  44% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  48% {
+    opacity: 1;
+  }
+  68%,
+  100% {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+}
