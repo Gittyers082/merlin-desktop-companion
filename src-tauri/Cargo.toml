@@ -1,8 +1,8 @@
 [package]
 name = "merlin-desktop-pet"
 version = "0.1.0"
-description = "A Tauri App"
-authors = ["you"]
+description = "Merlin, a skull-wizard desktop pet"
+authors = ["Gittyers082"]
 edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
