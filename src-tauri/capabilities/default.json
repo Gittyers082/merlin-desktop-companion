@@ -11,6 +11,8 @@
     "core:window:allow-show",
     "core:window:allow-set-position",
     "core:window:allow-current-monitor",
-    "core:window:allow-set-ignore-cursor-events"
+    "core:window:allow-set-ignore-cursor-events",
+    "process:default",
+    "core:app:allow-default-window-icon"
   ]
 }

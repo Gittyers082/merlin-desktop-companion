@@ -4,18 +4,22 @@ import { initEmotes } from "./emotes";
 import { summon, despawn, resummon } from "./lifecycle";
 import { initDrag } from "./drag";
 import { initCursorWatch } from "./cursor";
+import { initContextMenu } from "./menu";
+import { initTray } from "./tray";
 
 buildFire();
 initEmotes();
 summon();
 
-// Drag Merlin around, or fling him. A plain click will open chat later.
-const drag = initDrag(() => {
+const openChat = () => {
   // TODO: open the chat bubble
-});
+};
 
-// Eyes follow your cursor; clicks pass through the space around him.
+const drag = initDrag(openChat);
+
 initCursorWatch(drag.isBusy);
+initContextMenu(openChat);
+initTray();
 
 // Dev only: click Merlin, then press 1–7 to preview his moods,
 // 8 to make him dizzy, or 9 to despawn and summon him again.

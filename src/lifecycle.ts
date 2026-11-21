@@ -2,6 +2,7 @@
 
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { setMood } from "./mood";
+import { exit } from "@tauri-apps/plugin-process";
 
 /** Must match the animation lengths in styles.css. */
 const SUMMON_MS = 3600;
@@ -27,4 +28,10 @@ export async function despawn(): Promise<void> {
 export async function resummon(): Promise<void> {
   await getCurrentWindow().show();
   await summon();
+}
+
+/** A dignified exit: sink into the circle, then close the app. */
+export async function quit(): Promise<void> {
+  if (await getCurrentWindow().isVisible()) await despawn();
+  await exit(0);
 }
