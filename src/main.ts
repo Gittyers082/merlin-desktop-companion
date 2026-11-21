@@ -3,10 +3,12 @@ import { setMood, type Mood } from "./mood";
 import { initEmotes } from "./emotes";
 import { summon, despawn, resummon } from "./lifecycle";
 import { initDrag } from "./drag";
+import { initCursorWatch } from "./cursor";
 
 buildFire();
 initEmotes();
 summon();
+initCursorWatch();
 
 // Drag Merlin around, or fling him. A plain click will open chat later.
 initDrag(() => {
