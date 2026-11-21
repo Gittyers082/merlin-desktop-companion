@@ -4,6 +4,7 @@
 import { invoke, Channel } from "@tauri-apps/api/core";
 import { getMood, setMood } from "./mood";
 import { MERLIN_PERSONALITY } from "./personality";
+import { loadSettings } from "./settings";
 
 interface ChatMessage {
   role: "system" | "user" | "assistant";
@@ -97,12 +98,17 @@ export function initChat(): ChatControl {
       };
     });
 
+    // Use whichever brain is picked in Settings.
+    const { provider, ollamaModel, claudeModel } = loadSettings();
+
     try {
       await invoke("chat", {
         messages: [{ role: "system", content: MERLIN_PERSONALITY }, ...history],
+        provider,
+        model: provider === "claude" ? claudeModel : ollamaModel,
         onEvent: channel,
       });
-      await finished;
+      finished;
       history.push({ role: "assistant", content: reply });
       if (getMood() === "talking") setMood("idle");
       hideSpeechLater(reply);
@@ -110,7 +116,9 @@ export function initChat(): ChatControl {
       console.error(error);
       history.pop(); // forget the question he couldn't answer
       const sorry =
-        "My crystal ball has gone dark... Is Ollama running, apprentice?";
+        provider === "claude"
+          ? "My crystal ball has gone dark... Is your Claude API key set in Settings, apprentice?"
+          : "My crystal ball has gone dark... Is Ollama running, apprentice?";
       setMood("confused");
       say(sorry);
       hideSpeechLater(sorry);
