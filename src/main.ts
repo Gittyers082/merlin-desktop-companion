@@ -1,5 +1,6 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { buildFire } from "./fire";
+import { setMood, type Mood } from "./mood";
 
 buildFire();
 
@@ -9,3 +10,20 @@ const stage = document.querySelector<HTMLElement>("#stage")!;
 stage.addEventListener("mousedown", (event) => {
   if (event.button === 0) getCurrentWindow().startDragging();
 });
+
+// Dev only: click Merlin, then press 1–7 to preview his moods.
+if (import.meta.env.DEV) {
+  const preview: Mood[] = [
+    "idle",
+    "vibing",
+    "thinking",
+    "sleepy",
+    "confused",
+    "happy",
+    "raging",
+  ];
+  window.addEventListener("keydown", (event) => {
+    const mood = preview[Number(event.key) - 1];
+    if (mood) setMood(mood);
+  });
+}
