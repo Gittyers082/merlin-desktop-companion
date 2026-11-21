@@ -8,12 +8,14 @@ import { initCursorWatch } from "./cursor";
 buildFire();
 initEmotes();
 summon();
-initCursorWatch();
 
 // Drag Merlin around, or fling him. A plain click will open chat later.
-initDrag(() => {
+const drag = initDrag(() => {
   // TODO: open the chat bubble
 });
+
+// Eyes follow your cursor; clicks pass through the space around him.
+initCursorWatch(drag.isBusy);
 
 // Dev only: click Merlin, then press 1–7 to preview his moods,
 // 8 to make him dizzy, or 9 to despawn and summon him again.

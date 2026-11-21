@@ -1098,3 +1098,13 @@ body {
 .eye-track {
   transition: transform 0.12s ease-out;
 }
+
+/* ---------- Click-through: only Merlin's body catches the mouse ---------- */
+.shadow,
+.flat,
+.beam,
+.rise,
+.ring,
+#sparks {
+  pointer-events: none;
+}

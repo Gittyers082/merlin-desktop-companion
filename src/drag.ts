@@ -24,12 +24,18 @@ const DIZZY_MS = 2600;
 const clamp = (n: number, min: number, max: number) =>
   Math.min(max, Math.max(min, n));
 
-export function initDrag(onClick: () => void): void {
+/** Returned so other modules can tell when Merlin is mid-drag or mid-flight. */
+export interface DragControl {
+  isBusy(): boolean;
+}
+
+export function initDrag(onClick: () => void): DragControl {
   const stage = document.querySelector<HTMLElement>("#stage")!;
   const body = document.querySelector<SVGSVGElement>("#merlin")!;
   const lean = document.querySelector<SVGGElement>(".lean")!;
 
   let pressed = false;
+  let flying = false;
   let moved = false;
   let startX = 0,
     startY = 0;
@@ -88,6 +94,7 @@ export function initDrag(onClick: () => void): void {
     stage.setPointerCapture(event.pointerId);
     cancelAnimationFrame(flight);
     clearTimeout(dizzyTimer);
+    flying = false;
     body.style.transform = "";
     pressed = true;
     moved = false;
@@ -155,6 +162,7 @@ export function initDrag(onClick: () => void): void {
 
   /** Let go mid-swing: tumble across the screen, bounce, slow down, get dizzy. */
   const fly = () => {
+    flying = true;
     setMood("flying");
     let spinSpeed = vx * 1.6;
     let spin = 0;
@@ -179,6 +187,7 @@ export function initDrag(onClick: () => void): void {
         const upright = Math.round(spin / 360) * 360;
         spin += (upright - spin) * 0.2;
         if (Math.abs(upright - spin) < 1) {
+          flying = false;
           body.style.transform = "";
           setLean(0);
           setMood("dizzy");
@@ -195,4 +204,6 @@ export function initDrag(onClick: () => void): void {
     };
     flight = requestAnimationFrame(step);
   };
+
+  return { isBusy: () => pressed || flying };
 }
