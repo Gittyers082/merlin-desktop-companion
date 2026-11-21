@@ -7,6 +7,7 @@ import { initCursorWatch } from "./cursor";
 import { initContextMenu } from "./menu";
 import { initTray } from "./tray";
 import { initChat } from "./chat";
+import { initSenses } from "./senses";
 
 buildFire();
 initEmotes();
@@ -25,6 +26,7 @@ initCursorWatch(drag.isBusy);
 // Right-click menu and system tray icon.
 initContextMenu(openChat);
 initTray();
+initSenses();
 
 // Dev only: click Merlin, then press 1–7 to preview his moods,
 // 8 to make him dizzy, or 9 to despawn and summon him again.
@@ -40,7 +42,7 @@ if (import.meta.env.DEV) {
     "dizzy",
   ];
   window.addEventListener("keydown", async (event) => {
-    if (event.target instanceof HTMLInputElement) return; // typing to Merlin, not testing
+    if (event.target instanceof HTMLInputElement) return;
     if (event.key === "9") {
       await despawn();
       setTimeout(resummon, 800);
