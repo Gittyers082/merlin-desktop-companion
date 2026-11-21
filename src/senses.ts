@@ -4,6 +4,7 @@
 
 import { listen } from "@tauri-apps/api/event";
 import { getMood, onMoodChange, setMood, type Mood } from "./mood";
+import { loadSettings, onSettingsChange } from "./settings";
 
 /** Matches the NowPlaying struct in src-tauri/src/music.rs. */
 interface NowPlaying {
@@ -19,31 +20,50 @@ interface PcStatus {
   cpu: number;
 }
 
-/** Fall asleep after this long without mouse or keyboard input. */
-const SLEEP_AFTER_S = 60;
-/** CPU % that makes him start raging, and the % he calms down below. */
-const RAGE_CPU = 90;
-const CALM_CPU = 70;
+/** He calms down this many % below the rage threshold. */
+const CALM_MARGIN = 20;
 /** How many hot readings in a row (2s apart) before he actually rages. */
 const RAGE_AFTER_TICKS = 3;
+/** Media from these apps counts as "video", not music (matched case-insensitively).
+ *  308046B0AF4A39CB is how Windows identifies Firefox. */
+const BROWSERS = [
+  "chrome",
+  "msedge",
+  "firefox",
+  "308046b0af4a39cb",
+  "opera",
+  "brave",
+  "vivaldi",
+];
 
 /** Moods the senses are allowed to switch between. Everything else
  *  (summon, talking, being thrown…) is never interrupted. */
 const AMBIENT: Mood[] = ["idle", "vibing", "sleepy", "raging"];
 
+let settings = loadSettings();
+let lastMedia: NowPlaying | null = null;
 const state = {
-  music: false,
   idleSeconds: 0,
   hot: false,
   hotTicks: 0,
 };
 let pausedUntil = 0;
 
+const isBrowser = (app: string) =>
+  BROWSERS.some((name) => app.toLowerCase().includes(name));
+
+/** Is something playing that he should vibe to, given the settings? */
+function hearsMusic(): boolean {
+  if (!settings.music || !lastMedia?.playing) return false;
+  return settings.musicSource === "anything" || !isBrowser(lastMedia.app);
+}
+
 /** Which background mood fits right now, most important first. */
 function ambientMood(): Mood {
-  if (state.hot) return "raging";
-  if (state.idleSeconds >= SLEEP_AFTER_S) return "sleepy";
-  if (state.music) return "vibing";
+  if (settings.rage && state.hot) return "raging";
+  if (settings.sleep && state.idleSeconds >= settings.sleepAfterMin * 60)
+    return "sleepy";
+  if (hearsMusic()) return "vibing";
   return "idle";
 }
 
@@ -62,7 +82,7 @@ export function pauseSenses(ms: number): void {
 
 export async function initSenses(): Promise<void> {
   await listen<NowPlaying>("now-playing", ({ payload }) => {
-    state.music = payload.playing;
+    lastMedia = payload;
     update();
   });
 
@@ -71,10 +91,16 @@ export async function initSenses(): Promise<void> {
 
     // Hysteresis: get hot only after several hot readings, cool down only
     // well below the limit, so he doesn't flicker in and out of rage.
-    state.hotTicks = payload.cpu >= RAGE_CPU ? state.hotTicks + 1 : 0;
+    state.hotTicks = payload.cpu >= settings.rageCpu ? state.hotTicks + 1 : 0;
     if (state.hotTicks >= RAGE_AFTER_TICKS) state.hot = true;
-    if (payload.cpu < CALM_CPU) state.hot = false;
+    if (payload.cpu < settings.rageCpu - CALM_MARGIN) state.hot = false;
 
+    update();
+  });
+
+  // New settings from the Settings window apply immediately.
+  await onSettingsChange((next) => {
+    settings = next;
     update();
   });
 
