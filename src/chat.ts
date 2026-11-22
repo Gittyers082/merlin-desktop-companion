@@ -5,6 +5,7 @@ import { invoke, Channel } from "@tauri-apps/api/core";
 import { getMood, setMood } from "./mood";
 import { MERLIN_PERSONALITY } from "./personality";
 import { loadSettings } from "./settings";
+import { babble } from "./sounds";
 
 interface ChatMessage {
   role: "system" | "user" | "assistant";

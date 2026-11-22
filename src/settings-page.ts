@@ -59,6 +59,7 @@ function read(): Settings {
     ollamaModel:
       String(data.get("ollamaModel")).trim() || DEFAULT_SETTINGS.ollamaModel,
     claudeModel: String(data.get("claudeModel")),
+    sounds: data.has("sounds"),
   };
 }
 

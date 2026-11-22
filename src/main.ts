@@ -8,9 +8,11 @@ import { initContextMenu } from "./menu";
 import { initTray } from "./tray";
 import { initChat } from "./chat";
 import { initSenses, pauseSenses } from "./senses";
+import { initSounds } from "./sounds";
 
 buildFire();
 initEmotes();
+initSounds();
 summon();
 
 // Click Merlin (or pick "Talk to Merlin") to chat.

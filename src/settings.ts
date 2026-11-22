@@ -19,6 +19,9 @@ export interface Settings {
   provider: "ollama" | "claude";
   ollamaModel: string;
   claudeModel: string;
+
+  /** Play sound effects. */
+  sounds: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -31,6 +34,7 @@ export const DEFAULT_SETTINGS: Settings = {
   provider: "ollama",
   ollamaModel: "llama3.2",
   claudeModel: "claude-haiku-5-5",
+  sounds: true,
 };
 
 const STORAGE_KEY = "merlin.settings";
