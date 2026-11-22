@@ -5,7 +5,6 @@
   "windows": ["main"],
   "permissions": [
     "core:default",
-    "opener:default",
     "core:window:allow-hide",
     "core:window:allow-show",
     "core:window:allow-set-position",
@@ -14,6 +13,7 @@
     "process:default",
     "core:app:allow-default-window-icon",
     "core:window:allow-set-focus",
-    "core:window:allow-unminimize"
+    "core:window:allow-unminimize",
+    "core:window:allow-set-skip-taskbar"
   ]
 }
