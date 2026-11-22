@@ -64,6 +64,8 @@ export function initChat(): ChatControl {
     speech.scrollTop = speech.scrollHeight;
   };
 
+  babble();
+
   /** Leaves the bubble up long enough to read, then tidies up. */
   const hideSpeechLater = (text: string) => {
     clearTimeout(hideTimer);
