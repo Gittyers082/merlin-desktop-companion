@@ -4,9 +4,8 @@ The skull of a long-dead archmage has haunted your desktop.
 
 Merlin is a desktop companion for developers. He floats on your screen, vibes to your music, falls asleep when you leave, rages when your CPU is maxed, and talks back, powered by a local **Ollama** model by default or the **Claude API** if you connect it.
 
-<!-- Replace with a real recording: docs/merlin-demo.gif -->
 
-![Merlin summoning, vibing and talking](docs/merlin-demo.gif)
+![Merlin's summoning ritual: a magic circle, a beam of light, then his fire ignites](docs/merlin-demo.gif)
 
 ## Features
 
