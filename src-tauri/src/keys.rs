@@ -3,6 +3,7 @@
 
 use keyring::Entry;
 
+// Kept from before the rename so keys saved by earlier builds still work.
 const SERVICE: &str = "merlin-desktop-pet";
 const ACCOUNT: &str = "claude-api-key";
 

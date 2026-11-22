@@ -2303,7 +2303,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "merlin-desktop-pet"
+name = "merlin-desktop-companion"
 version = "0.1.0"
 dependencies = [
  "futures-util",
