@@ -1,6 +1,6 @@
 [package]
 name = "merlin-desktop-companion"
-version = "0.1.0"
+version = "0.1.1"
 description = "Merlin, a skull-wizard desktop companion"
 authors = ["Gittyers082"]
 edition = "2024"
