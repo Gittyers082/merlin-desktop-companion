@@ -1,57 +1,64 @@
-// Dragging and throwing Merlin.
-// We move the window ourselves (instead of letting Windows do it) so we
-// know how fast you're moving him — that lets his fire lean, and lets
-// him fly when you let go mid-swing.
+// Dragging and throwing Merlin. We move the window ourselves (instead of
+// letting Windows do it) so we know how fast he's moving: that's what makes
+// his fire lean and lets him fly when you let go mid-swing.
 
-import { getCurrentWindow, currentMonitor } from "@tauri-apps/api/window";
 import { LogicalPosition } from "@tauri-apps/api/dpi";
+import { currentMonitor, getCurrentWindow } from "@tauri-apps/api/window";
 import { getMood, setMood, type Mood } from "./mood";
+import { clamp, element } from "./utils";
+
+interface Point {
+  x: number;
+  y: number;
+}
 
 const win = getCurrentWindow();
 
-const WIN_W = 420;
-const WIN_H = 480;
 /** How far the window may hang off-screen (the empty space around Merlin). */
 const MARGIN = { left: 110, right: 110, top: 70, bottom: 60 };
 /** Pixels you must move before a press counts as a drag, not a click. */
 const CLICK_SLOP = 4;
 /** Release speed (px per frame) that turns a drop into a throw. */
 const THROW_SPEED = 6;
+/** Below this speed a thrown Merlin counts as stopped. */
+const STOP_SPEED = 0.4;
 const FRICTION = 0.965;
 const BOUNCE = 0.8;
+const SPIN_PER_SPEED = 1.6;
+const LEAN_PER_SPEED = 3;
+const MAX_LEAN = 40;
+/** If the cursor pauses this long mid-drag, the fire whips back upright. */
+const LEAN_RESET_MS = 90;
 const DIZZY_MS = 2600;
+const FRAME_MS = 16;
+/** Moods that are about the drag itself; we never return to these afterwards. */
+const DRAG_MOODS: Mood[] = ["startled", "flying", "dizzy"];
 
-const clamp = (n: number, min: number, max: number) =>
-  Math.min(max, Math.max(min, n));
-
-/** Returned so other modules can tell when Merlin is mid-drag or mid-flight. */
+/** Lets other modules tell when Merlin is mid-drag or mid-flight. */
 export interface DragControl {
   isBusy(): boolean;
 }
 
 export function initDrag(onClick: () => void): DragControl {
-  const stage = document.querySelector<HTMLElement>("#stage")!;
-  const body = document.querySelector<SVGSVGElement>("#merlin")!;
-  const lean = document.querySelector<SVGGElement>(".lean")!;
+  const stage = element<HTMLElement>("#stage");
+  const body = element<SVGSVGElement>("#merlin");
+  const lean = element<SVGGElement>(".lean");
 
   let pressed = false;
   let flying = false;
   let moved = false;
-  let startX = 0,
-    startY = 0;
-  let winX = 0,
-    winY = 0;
-  let x = 0,
-    y = 0;
-  let lastX = 0,
-    lastY = 0,
-    lastT = 0;
-  let vx = 0,
-    vy = 0;
+  let moodBefore: Mood = "idle";
+  let lastTime = 0;
   let flight = 0;
   let leanReset = 0;
   let dizzyTimer = 0;
-  let moodBefore: Mood = "idle";
+
+  const pressAt: Point = { x: 0, y: 0 }; // cursor on screen when pressed
+  const windowAtPress: Point = { x: 0, y: 0 };
+  const windowPos: Point = { x: 0, y: 0 };
+  const lastCursor: Point = { x: 0, y: 0 };
+  const velocity: Point = { x: 0, y: 0 }; // px per 60fps frame
+
   let bounds = {
     minX: -Infinity,
     maxX: Infinity,
@@ -60,137 +67,71 @@ export function initDrag(onClick: () => void): DragControl {
   };
 
   const setLean = (deg: number) => {
-    lean.style.transform = `rotate(${clamp(deg, -40, 40)}deg)`;
+    lean.style.transform = `rotate(${clamp(deg, -MAX_LEAN, MAX_LEAN)}deg)`;
   };
 
-  const moveTo = (nx: number, ny: number) => {
-    x = clamp(nx, bounds.minX, bounds.maxX);
-    y = clamp(ny, bounds.minY, bounds.maxY);
-    win.setPosition(new LogicalPosition(x, y));
+  const leanAgainstMotion = () => setLean(-velocity.x * LEAN_PER_SPEED);
+
+  const moveTo = (x: number, y: number) => {
+    windowPos.x = clamp(x, bounds.minX, bounds.maxX);
+    windowPos.y = clamp(y, bounds.minY, bounds.maxY);
+    void win.setPosition(new LogicalPosition(windowPos.x, windowPos.y));
   };
 
   /** The screen edges Merlin bounces off, in logical pixels. */
   const updateBounds = async () => {
     const monitor = await currentMonitor();
     if (!monitor) return;
-    // workArea = the screen minus the taskbar, so he bounces off the taskbar too.
-    const s = monitor.scaleFactor;
+    // The work area excludes the taskbar, so he bounces off that too.
+    const scale = monitor.scaleFactor;
     const { position, size } = monitor.workArea;
-    const left = position.x / s;
-    const top = position.y / s;
-    const width = size.width / s;
-    const height = size.height / s;
+    const left = position.x / scale;
+    const top = position.y / scale;
     bounds = {
       minX: left - MARGIN.left,
-      maxX: left + width - WIN_W + MARGIN.right,
+      maxX: left + size.width / scale - window.innerWidth + MARGIN.right,
       minY: top - MARGIN.top,
-      maxY: top + height - WIN_H + MARGIN.bottom,
+      maxY: top + size.height / scale - window.innerHeight + MARGIN.bottom,
     };
   };
-  updateBounds();
 
-  stage.addEventListener("pointerdown", (event) => {
-    if (event.button !== 0) return;
-    if ((event.target as Element).closest("[data-interactive]")) return; // clicks in the chat box aren't drags
-    stage.setPointerCapture(event.pointerId);
-    cancelAnimationFrame(flight);
-    clearTimeout(dizzyTimer);
+  const settle = () => {
     flying = false;
     body.style.transform = "";
-    pressed = true;
-    moved = false;
-    startX = lastX = event.screenX;
-    startY = lastY = event.screenY;
-    lastT = event.timeStamp;
-    vx = vy = 0;
-    // The window is frameless, so its top-left is where the page starts on screen.
-    winX = x = event.screenX - event.clientX;
-    winY = y = event.screenY - event.clientY;
-    updateBounds();
-  });
-
-  stage.addEventListener("pointermove", (event) => {
-    if (!pressed) return;
-    const dx = event.screenX - startX;
-    const dy = event.screenY - startY;
-    if (!moved) {
-      if (Math.hypot(dx, dy) < CLICK_SLOP) return;
-      moved = true;
-      const mood = getMood();
-      moodBefore =
-        mood === "startled" || mood === "flying" || mood === "dizzy"
-          ? "idle"
-          : mood;
-      setMood("startled");
-    }
-
-    // Velocity in "pixels per 60fps frame", smoothed a little.
-    const dt = Math.max(1, event.timeStamp - lastT);
-    vx = vx * 0.5 + ((event.screenX - lastX) / dt) * 16 * 0.5;
-    vy = vy * 0.5 + ((event.screenY - lastY) / dt) * 16 * 0.5;
-    lastX = event.screenX;
-    lastY = event.screenY;
-    lastT = event.timeStamp;
-
-    moveTo(winX + dx, winY + dy);
-
-    // Fire leans against the motion, and whips back when you stop.
-    setLean(-vx * 3);
-    clearTimeout(leanReset);
-    leanReset = window.setTimeout(() => {
-      vx = vy = 0;
-      setLean(0);
-    }, 90);
-  });
-
-  const release = () => {
-    if (!pressed) return;
-    pressed = false;
-    clearTimeout(leanReset);
-    if (!moved) {
-      onClick();
-      return;
-    }
-    if (Math.hypot(vx, vy) > THROW_SPEED) {
-      fly();
-    } else {
-      setLean(0);
-      setMood(moodBefore);
-    }
+    setLean(0);
   };
-  stage.addEventListener("pointerup", release);
-  stage.addEventListener("pointercancel", release);
 
   /** Let go mid-swing: tumble across the screen, bounce, slow down, get dizzy. */
   const fly = () => {
     flying = true;
     setMood("flying");
-    let spinSpeed = vx * 1.6;
+    let spinSpeed = velocity.x * SPIN_PER_SPEED;
     let spin = 0;
 
     const step = () => {
-      x += vx;
-      y += vy;
-      if (x < bounds.minX || x > bounds.maxX) {
-        vx = -vx * BOUNCE;
-        spinSpeed = -spinSpeed * BOUNCE;
+      windowPos.x += velocity.x;
+      windowPos.y += velocity.y;
+      const hitSide = windowPos.x < bounds.minX || windowPos.x > bounds.maxX;
+      const hitTopOrBottom =
+        windowPos.y < bounds.minY || windowPos.y > bounds.maxY;
+      if (hitSide) {
+        velocity.x *= -BOUNCE;
+        spinSpeed *= -BOUNCE;
       }
-      if (y < bounds.minY || y > bounds.maxY) vy = -vy * BOUNCE;
-      moveTo(x, y);
+      if (hitTopOrBottom) velocity.y *= -BOUNCE;
+      moveTo(windowPos.x, windowPos.y);
 
-      vx *= FRICTION;
-      vy *= FRICTION;
+      velocity.x *= FRICTION;
+      velocity.y *= FRICTION;
       spinSpeed *= FRICTION;
       spin += spinSpeed;
 
       // Nearly stopped: ease the spin back upright, then get dizzy.
-      if (Math.hypot(vx, vy) < 0.4) {
+      if (Math.hypot(velocity.x, velocity.y) < STOP_SPEED) {
         const upright = Math.round(spin / 360) * 360;
         spin += (upright - spin) * 0.2;
         if (Math.abs(upright - spin) < 1) {
-          flying = false;
-          body.style.transform = "";
-          setLean(0);
+          settle();
           setMood("dizzy");
           dizzyTimer = window.setTimeout(() => {
             if (getMood() === "dizzy") setMood(moodBefore);
@@ -200,11 +141,75 @@ export function initDrag(onClick: () => void): DragControl {
       }
 
       body.style.transform = `rotate(${spin}deg)`;
-      setLean(-vx * 3);
+      leanAgainstMotion();
       flight = requestAnimationFrame(step);
     };
     flight = requestAnimationFrame(step);
   };
+
+  stage.addEventListener("pointerdown", (event) => {
+    if (event.button !== 0) return;
+    // Clicks in the chat box aren't drags.
+    if ((event.target as Element).closest("[data-interactive]")) return;
+    stage.setPointerCapture(event.pointerId);
+    cancelAnimationFrame(flight);
+    clearTimeout(dizzyTimer);
+    settle();
+    pressed = true;
+    moved = false;
+    pressAt.x = lastCursor.x = event.screenX;
+    pressAt.y = lastCursor.y = event.screenY;
+    lastTime = event.timeStamp;
+    velocity.x = velocity.y = 0;
+    // The window is frameless, so its top-left is where the page starts on screen.
+    windowAtPress.x = windowPos.x = event.screenX - event.clientX;
+    windowAtPress.y = windowPos.y = event.screenY - event.clientY;
+    void updateBounds();
+  });
+
+  stage.addEventListener("pointermove", (event) => {
+    if (!pressed) return;
+    const dx = event.screenX - pressAt.x;
+    const dy = event.screenY - pressAt.y;
+    if (!moved) {
+      if (Math.hypot(dx, dy) < CLICK_SLOP) return;
+      moved = true;
+      const mood = getMood();
+      moodBefore = DRAG_MOODS.includes(mood) ? "idle" : mood;
+      setMood("startled");
+    }
+
+    // Average the new speed with the previous one to smooth out jitter.
+    const frames = Math.max(1, event.timeStamp - lastTime) / FRAME_MS;
+    velocity.x = (velocity.x + (event.screenX - lastCursor.x) / frames) / 2;
+    velocity.y = (velocity.y + (event.screenY - lastCursor.y) / frames) / 2;
+    lastCursor.x = event.screenX;
+    lastCursor.y = event.screenY;
+    lastTime = event.timeStamp;
+
+    moveTo(windowAtPress.x + dx, windowAtPress.y + dy);
+
+    leanAgainstMotion();
+    clearTimeout(leanReset);
+    leanReset = window.setTimeout(() => {
+      velocity.x = velocity.y = 0;
+      setLean(0);
+    }, LEAN_RESET_MS);
+  });
+
+  const release = () => {
+    if (!pressed) return;
+    pressed = false;
+    clearTimeout(leanReset);
+    if (!moved) return onClick();
+    if (Math.hypot(velocity.x, velocity.y) > THROW_SPEED) return fly();
+    setLean(0);
+    setMood(moodBefore);
+  };
+  stage.addEventListener("pointerup", release);
+  stage.addEventListener("pointercancel", release);
+
+  void updateBounds();
 
   return { isBusy: () => pressed || flying };
 }

@@ -1,30 +1,31 @@
-// Merlin's icon in the system tray (bottom-right of the taskbar).
-// Left-click to summon him or send him away; right-click for the menu.
+// Merlin's system tray icon: left-click summons him or sends him away,
+// right-click opens the menu.
 
-import { TrayIcon } from "@tauri-apps/api/tray";
-import { Menu } from "@tauri-apps/api/menu";
 import { defaultWindowIcon } from "@tauri-apps/api/app";
+import { Menu } from "@tauri-apps/api/menu";
+import { TrayIcon } from "@tauri-apps/api/tray";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { despawn, resummon, quit } from "./lifecycle";
+import { despawn, quit, resummon } from "./lifecycle";
 import { openSettings } from "./open-settings";
 
-// Keep a reference so the tray icon isn't garbage-collected.
-let tray: TrayIcon | undefined;
-let busy = false;
+/** Held for the app's lifetime so the icon is never released. */
+let tray: TrayIcon | null = null;
+let toggling = false;
 
-/** Summons Merlin if he's hidden, sends him away if he's out. */
 async function toggle(): Promise<void> {
-  if (busy) return;
-  busy = true;
+  if (toggling) return;
+  toggling = true;
   try {
     if (await getCurrentWindow().isVisible()) await despawn();
     else await resummon();
   } finally {
-    busy = false;
+    toggling = false;
   }
 }
 
 export async function initTray(): Promise<void> {
+  if (tray) return;
+
   const menu = await Menu.new({
     items: [
       { id: "settings", text: "Settings…", action: () => void openSettings() },
@@ -41,17 +42,11 @@ export async function initTray(): Promise<void> {
     menu,
     showMenuOnLeftClick: false,
     action: (event) => {
-      if (
+      const leftClickReleased =
         event.type === "Click" &&
         event.button === "Left" &&
-        event.buttonState === "Up"
-      ) {
-        void toggle();
-      }
+        event.buttonState === "Up";
+      if (leftClickReleased) void toggle();
     },
   });
-}
-
-export function getTray(): TrayIcon | undefined {
-  return tray;
 }

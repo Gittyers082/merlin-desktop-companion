@@ -1,6 +1,7 @@
-// Merlin's mood state machine.
-// A mood is just a class on #stage (e.g. "mood-vibing"). CSS reads that
-// class and swaps his animations; other modules can listen for changes.
+// Merlin's mood is a class on #stage (e.g. "mood-vibing"). CSS swaps his
+// animations based on it, and other modules subscribe to changes.
+
+import { element } from "./utils";
 
 export type Mood =
   | "summon"
@@ -19,13 +20,14 @@ export type Mood =
 
 type Listener = (mood: Mood, previous: Mood) => void;
 
-const stage = document.querySelector<HTMLElement>("#stage")!;
+const PREFIX = "mood-";
+const stage = element<HTMLElement>("#stage");
 const listeners = new Set<Listener>();
 
-// Start in whatever mood index.html puts on #stage (he wakes up summoning).
+// Start in whatever mood index.html declares (he wakes up summoning).
 let current = (Array.from(stage.classList)
-  .find((c) => c.startsWith("mood-"))
-  ?.slice(5) ?? "idle") as Mood;
+  .find((name) => name.startsWith(PREFIX))
+  ?.slice(PREFIX.length) ?? "idle") as Mood;
 
 export function getMood(): Mood {
   return current;
@@ -34,12 +36,12 @@ export function getMood(): Mood {
 export function setMood(mood: Mood): void {
   if (mood === current) return;
   const previous = current;
-  stage.classList.replace(`mood-${previous}`, `mood-${mood}`);
+  stage.classList.replace(PREFIX + previous, PREFIX + mood);
   current = mood;
   listeners.forEach((listener) => listener(mood, previous));
 }
 
-/** Runs `listener` every time the mood changes. Returns an unsubscribe function. */
+/** Returns an unsubscribe function. */
 export function onMoodChange(listener: Listener): () => void {
   listeners.add(listener);
   return () => listeners.delete(listener);

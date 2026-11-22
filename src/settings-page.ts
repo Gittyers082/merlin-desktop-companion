@@ -1,51 +1,48 @@
 // The Settings window: fills the form from the saved settings, saves on
-// every change, and manages the Claude API key through Rust.
+// every change, and manages the Claude API key and autostart.
 
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { disable, enable, isEnabled } from "@tauri-apps/plugin-autostart";
 import {
   DEFAULT_SETTINGS,
   loadSettings,
   saveSettings,
   type Settings,
 } from "./settings";
-import { enable, disable, isEnabled } from "@tauri-apps/plugin-autostart";
+import { element } from "./utils";
 
-const form = document.querySelector<HTMLFormElement>("#settings")!;
-const sleepLabel = document.querySelector<HTMLElement>("#sleep-value")!;
-const rageLabel = document.querySelector<HTMLElement>("#rage-value")!;
-const keyInput = document.querySelector<HTMLInputElement>("#claude-key")!;
-const keyStatus = document.querySelector<HTMLElement>("#key-status")!;
-const saveKeyButton = document.querySelector<HTMLButtonElement>("#save-key")!;
-const removeKeyButton =
-  document.querySelector<HTMLButtonElement>("#remove-key")!;
+const form = element<HTMLFormElement>("#settings");
+const sleepLabel = element<HTMLElement>("#sleep-value");
+const rageLabel = element<HTMLElement>("#rage-value");
+const keyInput = element<HTMLInputElement>("#claude-key");
+const keyStatus = element<HTMLElement>("#key-status");
+const saveKeyButton = element<HTMLButtonElement>("#save-key");
+const removeKeyButton = element<HTMLButtonElement>("#remove-key");
+const autostart = element<HTMLInputElement>("#autostart");
 
-/** Puts saved values into the form controls (matched by their `name`). */
+/** Puts saved values into the form controls, matched by their `name`. */
 function fill(settings: Settings): void {
-  for (const element of Array.from(form.elements)) {
-    if (
-      !(
-        element instanceof HTMLInputElement ||
-        element instanceof HTMLSelectElement
-      )
-    )
-      continue;
-    if (!(element.name in settings)) continue;
-    const value = settings[element.name as keyof Settings];
-    if (element instanceof HTMLInputElement && element.type === "checkbox") {
-      element.checked = Boolean(value);
+  for (const control of Array.from(form.elements)) {
+    const isField =
+      control instanceof HTMLInputElement ||
+      control instanceof HTMLSelectElement;
+    if (!isField || !(control.name in settings)) continue;
+
+    const value = settings[control.name as keyof Settings];
+    if (control instanceof HTMLInputElement && control.type === "checkbox") {
+      control.checked = Boolean(value);
     } else if (
-      element instanceof HTMLInputElement &&
-      element.type === "radio"
+      control instanceof HTMLInputElement &&
+      control.type === "radio"
     ) {
-      element.checked = element.value === value;
+      control.checked = control.value === value;
     } else {
-      element.value = String(value);
+      control.value = String(value);
     }
   }
 }
 
-/** Reads the form back into a Settings object. */
 function read(): Settings {
   const data = new FormData(form);
   return {
@@ -63,7 +60,7 @@ function read(): Settings {
   };
 }
 
-/** Updates the little value labels and shows the right brain section. */
+/** Updates the slider labels and shows the section for the chosen brain. */
 function refreshLabels(settings: Settings): void {
   sleepLabel.textContent = `${settings.sleepAfterMin} min`;
   rageLabel.textContent = `${settings.rageCpu}%`;
@@ -78,13 +75,12 @@ async function refreshKeyStatus(): Promise<void> {
   removeKeyButton.hidden = !hasKey;
 }
 
-// Start with what's saved.
 const initial = loadSettings();
 fill(initial);
 refreshLabels(initial);
-refreshKeyStatus();
+void refreshKeyStatus();
 
-// Save on every change. "input" fires while dragging sliders, too.
+// "input" also fires while a slider is being dragged.
 form.addEventListener("input", () => {
   const settings = read();
   refreshLabels(settings);
@@ -107,17 +103,18 @@ removeKeyButton.addEventListener("click", async () => {
   await refreshKeyStatus();
 });
 
-// Closing the window just hides it, so it opens instantly next time.
-const win = getCurrentWindow();
-win.onCloseRequested(async (event) => {
-  event.preventDefault();
-  await win.hide();
+// Autostart is stored by Windows itself, so ask it rather than keeping a copy.
+void isEnabled().then((enabled) => {
+  autostart.checked = enabled;
 });
-
-// "Start with Windows" lives in Windows itself, not in our settings.
-const autostart = document.querySelector<HTMLInputElement>("#autostart")!;
-isEnabled().then((enabled) => (autostart.checked = enabled));
 autostart.addEventListener("change", async () => {
   if (autostart.checked) await enable();
   else await disable();
+});
+
+// Closing only hides the window, so it reopens instantly.
+const win = getCurrentWindow();
+void win.onCloseRequested(async (event) => {
+  event.preventDefault();
+  await win.hide();
 });

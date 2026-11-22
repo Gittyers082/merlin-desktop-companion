@@ -1,21 +1,23 @@
-// Merlin's sound effects, synthesized live with the Web Audio API.
-// No audio files: every sound is a few oscillators and filtered noise,
-// so there's nothing to download or license.
+// Merlin's sound effects, synthesized live with the Web Audio API: just
+// oscillators and filtered noise, so there are no audio files to license.
 
 import { onMoodChange, type Mood } from "./mood";
 import { loadSettings, onSettingsChange } from "./settings";
+
+const MASTER_VOLUME = 0.6;
+const BABBLE_GAP_MS = 75;
 
 let enabled = loadSettings().sounds;
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
 let lastBabble = 0;
 
-/** Creates the audio engine on first use. */
+/** Created lazily on first use. */
 function audio(): { ctx: AudioContext; out: GainNode } {
   if (!ctx || !master) {
     ctx = new AudioContext();
     master = ctx.createGain();
-    master.gain.value = 0.6;
+    master.gain.value = MASTER_VOLUME;
     master.connect(ctx.destination);
   }
   if (ctx.state === "suspended") void ctx.resume();
@@ -92,7 +94,7 @@ function whoosh({ from, to, start = 0, dur, vol = 0.12 }: WhooshOptions): void {
   noise.stop(t + dur + 0.05);
 }
 
-/** A run of quick notes, like a magic chime. */
+/** A quick run of notes. */
 function chime(notes: number[], start = 0, gap = 0.08): void {
   notes.forEach((freq, i) =>
     tone({
@@ -105,10 +107,10 @@ function chime(notes: number[], start = 0, gap = 0.08): void {
   );
 }
 
-// Notes (Hz): C5, E5, G5, C6 — a bright major arpeggio.
+/** C5, E5, G5, C6 in Hz: a bright major arpeggio. */
 const ARPEGGIO = [523.25, 659.25, 783.99, 1046.5];
 
-/** One sound per mood change. Timings line up with the CSS animations. */
+/** One sound per mood change, timed to line up with the CSS animations. */
 const MOOD_SOUNDS: Partial<Record<Mood, () => void>> = {
   summon: () => {
     whoosh({ from: 400, to: 3000, dur: 1.2 });
@@ -135,11 +137,11 @@ const MOOD_SOUNDS: Partial<Record<Mood, () => void>> = {
   },
 };
 
-/** A tiny bone-clack blip while he talks, at most every 75 ms. */
+/** A tiny bone-clack blip per chunk of speech, rate-limited. */
 export function babble(): void {
   if (!enabled) return;
   const now = performance.now();
-  if (now - lastBabble < 75) return;
+  if (now - lastBabble < BABBLE_GAP_MS) return;
   lastBabble = now;
   tone({
     freq: 220 + Math.random() * 160,
@@ -156,6 +158,6 @@ export function initSounds(): void {
   onSettingsChange((settings) => {
     enabled = settings.sounds;
   });
-  // He starts mid-summon (before any mood change), so play that one now.
+  // He starts mid-summon, before any mood change, so play that sound now.
   if (enabled) MOOD_SOUNDS.summon?.();
 }

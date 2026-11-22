@@ -9,6 +9,7 @@ body {
 }
 
 #stage {
+  position: relative;
   width: 100vw;
   height: 100vh;
   cursor: grab;
@@ -23,6 +24,8 @@ body {
   width: 100%;
   height: 100%;
   overflow: visible;
+  /* Spinning while thrown happens around his middle. */
+  transform-origin: 50% 55%;
 }
 
 /* ---------- Animation setup ---------- */
@@ -228,8 +231,7 @@ body {
   opacity: 0;
 }
 
-.eyes,
-.lean {
+.eyes {
   transform-origin: 50% 50%;
 }
 
@@ -525,10 +527,6 @@ body {
 }
 
 /* ---------- Overlay: emote bubble, notes, z's, thinking dots ---------- */
-
-#stage {
-  position: relative;
-}
 
 .overlay {
   position: absolute;
@@ -986,11 +984,6 @@ body {
 }
 
 /* ---------- Startled, flying and dizzy (dragging and throwing) ---------- */
-
-/* Spinning while thrown happens around his middle. */
-#merlin {
-  transform-origin: 50% 55%;
-}
 
 /* His fire leans from its base; drag.ts sets the angle. */
 #merlin .lean {

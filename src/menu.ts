@@ -1,4 +1,4 @@
-// Right-click Merlin for his menu.
+// Merlin's right-click menu.
 
 import { Menu } from "@tauri-apps/api/menu";
 import { despawn, quit } from "./lifecycle";
@@ -17,6 +17,6 @@ export async function initContextMenu(onTalk: () => void): Promise<void> {
 
   window.addEventListener("contextmenu", (event) => {
     event.preventDefault();
-    menu.popup();
+    void menu.popup();
   });
 }

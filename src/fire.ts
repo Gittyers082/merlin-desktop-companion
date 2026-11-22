@@ -1,8 +1,9 @@
-// Merlin's fire.
-// Each flame layer is one spiky "crown" path. We compute a few keyframe
-// shapes where every peak leans and stretches a bit differently, then let
-// SVG <animate> morph between them forever. Different speeds per layer
-// keep the fire from ever moving in sync — that's what makes it feel alive.
+// Merlin's fire. Each flame layer is one spiky "crown" path. We compute a few
+// keyframe shapes where every peak leans and stretches differently, and SVG
+// <animate> morphs between them forever. Each layer runs at its own speed so
+// the fire never moves in sync, which is what makes it feel alive.
+
+import { element } from "./utils";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 
@@ -136,6 +137,15 @@ const INNER: FlameLayer = {
 
 const fmt = (n: number) => n.toFixed(1);
 
+function setAttributes(
+  target: Element,
+  attributes: Record<string, string>,
+): void {
+  for (const [name, value] of Object.entries(attributes)) {
+    target.setAttribute(name, value);
+  }
+}
+
 /** Builds the path for one keyframe of a flame layer. */
 function crownPath(layer: FlameLayer, frame: number): string {
   const { baseLeft, baseRight, valleys, bend } = layer;
@@ -186,11 +196,10 @@ function buildLayer(layer: FlameLayer): SVGPathElement {
   const path = document.createElementNS(SVG_NS, "path");
   path.setAttribute("class", layer.className);
   path.setAttribute("d", shapes[0]);
-  for (const [name, value] of Object.entries(layer.attrs))
-    path.setAttribute(name, value);
+  setAttributes(path, layer.attrs);
 
   const morph = document.createElementNS(SVG_NS, "animate");
-  const anim: Record<string, string> = {
+  setAttributes(morph, {
     attributeName: "d",
     dur: `${layer.duration}s`,
     repeatCount: "indefinite",
@@ -200,9 +209,7 @@ function buildLayer(layer: FlameLayer): SVGPathElement {
     ).join(";"),
     keySplines: Array(frames).fill("0.45 0 0.55 1").join(";"),
     values: [...shapes, shapes[0]].join(";"),
-  };
-  for (const [name, value] of Object.entries(anim))
-    morph.setAttribute(name, value);
+  });
   path.appendChild(morph);
   return path;
 }
@@ -243,14 +250,9 @@ function buildSparks(group: SVGGElement, count = 15): void {
   }
 }
 
-/** Lights Merlin's fire: fills the empty fire groups in index.html. */
+/** Fills the empty fire groups in index.html. */
 export function buildFire(): void {
-  const outer = document.querySelector<SVGGElement>("#fire-outer");
-  const inner = document.querySelector<SVGGElement>("#fire-inner");
-  const sparks = document.querySelector<SVGGElement>("#sparks");
-  if (!outer || !inner || !sparks) return;
-
-  outer.append(buildLayer(HALO), buildLayer(MAIN));
-  inner.append(buildLayer(INNER));
-  buildSparks(sparks);
+  element("#fire-outer").append(buildLayer(HALO), buildLayer(MAIN));
+  element("#fire-inner").append(buildLayer(INNER));
+  buildSparks(element<SVGGElement>("#sparks"));
 }
