@@ -128,6 +128,9 @@ async fn ask_ollama(
     // Ollama sends one JSON object per line.
     for_each_line(response, |line| {
         let chunk: OllamaChunk = serde_json::from_str(line).map_err(|e| e.to_string())?;
+        if let Some(error) = chunk.error {
+            return Err(format!("Ollama error: {error}"));
+        }
         if let Some(message) = chunk.message
             && !message.content.is_empty()
         {
