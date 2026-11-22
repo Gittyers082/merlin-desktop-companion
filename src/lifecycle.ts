@@ -13,6 +13,7 @@ const DESPAWN_MS = 2400;
 
 /** Plays the summoning ritual, then settles into idle. */
 export async function summon(): Promise<void> {
+  await win.setSkipTaskbar(true);
   setMood("summon");
   await wait(SUMMON_MS);
   setMood("idle");
