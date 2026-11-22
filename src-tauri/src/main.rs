@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    merlin_desktop_pet_lib::run()
+    merlin_desktop_companion_lib::run()
 }

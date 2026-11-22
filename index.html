@@ -8,6 +8,240 @@
     <script type="module" src="/src/main.ts" defer></script>
   </head>
   <body>
-    <div id="merlin" data-tauri-drag-region>Merlin goes here</div>
+    <main id="stage" class="mood-summon">
+      <svg
+        id="merlin"
+        viewBox="-30 -70 260 294"
+        role="img"
+        aria-label="Merlin, a floating skull crowned with cyan fire"
+      >
+        <defs>
+          <!-- Wobbles the fire's edges like rising heat -->
+          <filter id="fire-flow" x="-20%" y="-30%" width="140%" height="150%">
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency="0.03 0.11"
+              numOctaves="2"
+              seed="4"
+              result="noise"
+            >
+              <animate
+                attributeName="baseFrequency"
+                dur="3s"
+                values="0.03 0.11;0.036 0.14;0.03 0.11"
+                repeatCount="indefinite"
+              />
+            </feTurbulence>
+            <feDisplacementMap
+              in="SourceGraphic"
+              in2="noise"
+              scale="5"
+              xChannelSelector="R"
+              yChannelSelector="G"
+            />
+          </filter>
+          <!-- Fire is hottest (palest) at the base -->
+          <linearGradient id="fire-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#1597BE" />
+            <stop offset="0.55" stop-color="#2EC4D6" />
+            <stop offset="1" stop-color="#8BE9F3" />
+          </linearGradient>
+          <linearGradient id="inner-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#8BE9F3" />
+            <stop offset="1" stop-color="#F4FEFF" />
+          </linearGradient>
+          <linearGradient id="beam-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#2EC4D6" stop-opacity="0" />
+            <stop offset="1" stop-color="#2EC4D6" stop-opacity="0.55" />
+          </linearGradient>
+        </defs>
+
+        <ellipse
+          class="shadow"
+          cx="100"
+          cy="200"
+          rx="40"
+          ry="5"
+          fill="#14213D"
+          opacity="0.14"
+        />
+        <!-- Magic circle on the floor, flattened so it looks like it's lying down -->
+        <g class="flat" transform="translate(100 200) scale(1 0.3)">
+          <g class="magic-circle">
+            <g
+              class="circle-spin"
+              fill="none"
+              stroke="#2EC4D6"
+              stroke-linejoin="round"
+            >
+              <circle class="circle-draw" r="62" stroke-width="4" />
+              <circle r="50" stroke-width="2" />
+              <circle r="14" stroke-width="2.5" />
+              <path d="M0 -50 L43.3 25 L-43.3 25 Z" stroke-width="2.5" />
+              <path d="M0 50 L43.3 -25 L-43.3 -25 Z" stroke-width="2.5" />
+              <path
+                d="M0 -60 L3 -56 L0 -52 L-3 -56 Z M0 60 L3 56 L0 52 L-3 56 Z M-60 0 L-56 3 L-52 0 L-56 -3 Z M60 0 L56 3 L52 0 L56 -3 Z"
+                fill="#2EC4D6"
+                stroke="none"
+              />
+            </g>
+          </g>
+        </g>
+        <!-- Beam of light, rising sparks and the fire ring for the summon -->
+        <rect
+          class="beam"
+          x="56"
+          y="30"
+          width="88"
+          height="170"
+          rx="10"
+          fill="url(#beam-grad)"
+        />
+        <circle class="rise" cx="68" cy="198" r="3" fill="#2EC4D6" />
+        <circle class="rise r2" cx="128" cy="200" r="2.5" fill="#2EC4D6" />
+        <circle class="rise r3" cx="92" cy="202" r="2" fill="#2EC4D6" />
+        <circle class="rise r4" cx="112" cy="198" r="3" fill="#2EC4D6" />
+        <circle
+          class="ring"
+          cx="100"
+          cy="110"
+          r="70"
+          fill="none"
+          stroke="#2EC4D6"
+          stroke-width="4"
+        />
+
+        <g class="float">
+          <!-- Stars that circle his head when he's dizzy -->
+          <g class="stars">
+            <g class="flat" transform="translate(100 -26) scale(1 0.4)">
+              <g
+                class="stars-spin"
+                fill="#2EC4D6"
+                stroke="#14213D"
+                stroke-width="2"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M38 -7 L40 -2 L45 0 L40 2 L38 7 L36 2 L31 0 L36 -2 Z"
+                />
+                <path
+                  d="M-38 -7 L-36 -2 L-31 0 L-36 2 L-38 7 L-40 2 L-45 0 L-40 -2 Z"
+                />
+                <path
+                  d="M0 31 L2 36 L7 38 L2 40 L0 45 L-2 40 L-7 38 L-2 36 Z"
+                />
+                <path
+                  d="M0 -45 L2 -40 L7 -38 L2 -36 L0 -31 L-2 -36 L-7 -38 L-2 -40 Z"
+                />
+              </g>
+            </g>
+          </g>
+          <!-- Fire: filled in by fire.ts -->
+          <g class="lean">
+            <g class="fire" id="fire-outer" filter="url(#fire-flow)"></g>
+            <g id="sparks"></g>
+            <g class="fire-inner" id="fire-inner" filter="url(#fire-flow)"></g>
+          </g>
+
+          <!-- Skull -->
+          <path
+            class="cranium"
+            d="M52 106 Q46 54 100 48 Q154 54 148 106 Q148 124 132 130 L128 142 L72 142 L68 130 Q52 124 52 106 Z"
+            fill="#F1EDE3"
+            stroke="#14213D"
+            stroke-width="3.5"
+            stroke-linejoin="round"
+          />
+          <path
+            class="crack"
+            d="M120 58 L113 72 L121 78"
+            fill="none"
+            stroke="#14213D"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+
+          <!-- Eye sockets and glowing pupils -->
+          <ellipse cx="78" cy="102" rx="16" ry="18" fill="#14213D" />
+          <ellipse cx="122" cy="102" rx="16" ry="18" fill="#14213D" />
+          <g class="eyes">
+            <g class="eye-track">
+              <g class="pupil pupil-l">
+                <circle cx="80" cy="106" r="5.5" fill="#2EC4D6" />
+              </g>
+              <g class="pupil pupil-r">
+                <circle cx="120" cy="106" r="5.5" fill="#2EC4D6" />
+              </g>
+            </g>
+          </g>
+
+          <!-- Nose and upper teeth (with the chipped one) -->
+          <path d="M95 120 L105 120 L100 128 Z" fill="#14213D" />
+          <g
+            class="teeth"
+            stroke="#14213D"
+            stroke-width="2.5"
+            stroke-linecap="round"
+          >
+            <line x1="84" y1="133" x2="84" y2="142" />
+            <line x1="92" y1="132" x2="92" y2="142" />
+            <line x1="100" y1="132" x2="100" y2="142" />
+            <line x1="108" y1="132" x2="108" y2="142" />
+            <line x1="116" y1="133" x2="116" y2="142" />
+          </g>
+          <path
+            class="chip"
+            d="M109.5 143 L116 143 L116 136.5 L113.5 138.5 Z"
+            fill="#14213D"
+          />
+
+          <!-- Jaw: separate so he can talk and chatter -->
+          <g class="jaw">
+            <path
+              d="M72 142 L128 142 Q131 162 116 168 L84 168 Q69 162 72 142 Z"
+              fill="#F1EDE3"
+              stroke="#14213D"
+              stroke-width="3.5"
+              stroke-linejoin="round"
+            />
+            <g stroke="#14213D" stroke-width="2.5" stroke-linecap="round">
+              <line x1="86" y1="142" x2="86" y2="152" />
+              <line x1="95" y1="142" x2="95" y2="153" />
+              <line x1="105" y1="142" x2="105" y2="153" />
+              <line x1="114" y1="142" x2="114" y2="152" />
+            </g>
+          </g>
+        </g>
+      </svg>
+      <!-- Emotes and effects drawn on top of Merlin -->
+      <div class="overlay" aria-hidden="true">
+        <div id="emote" class="bubble"></div>
+        <div class="bubble thinking-dots">
+          <span></span><span></span><span></span>
+        </div>
+        <span class="note n1">♪</span>
+        <span class="note n2">♫</span>
+        <span class="note n3">♪</span>
+        <span class="zz z1">z</span>
+        <span class="zz z2">z</span>
+        <span class="zz z3">Z</span>
+      </div>
+      <!-- Chat: Merlin's speech bubble and the box you type in -->
+      <div class="chat" data-interactive>
+        <p id="speech" class="speech" aria-live="polite"></p>
+        <form id="chat-form" class="chat-form">
+          <input
+            id="chat-input"
+            type="text"
+            autocomplete="off"
+            maxlength="500"
+            placeholder="Speak, apprentice…"
+            aria-label="Message Merlin"
+          />
+        </form>
+      </div>
+    </main>
   </body>
 </html>

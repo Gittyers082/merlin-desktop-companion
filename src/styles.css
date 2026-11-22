@@ -1,19 +1,1215 @@
 html,
 body {
   margin: 0;
+  width: 100%;
+  height: 100%;
   background: transparent;
   overflow: hidden;
   user-select: none;
 }
 
-#merlin {
+#stage {
+  position: relative;
   width: 100vw;
   height: 100vh;
-  display: flex;
+  cursor: grab;
+}
+
+#stage:active {
+  cursor: grabbing;
+}
+
+#merlin {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  /* Spinning while thrown happens around his middle. */
+  transform-origin: 50% 55%;
+}
+
+/* ---------- Animation setup ---------- */
+
+/* Make every part transform around its own box, not the whole SVG. */
+#merlin * {
+  transform-box: fill-box;
+}
+
+.float {
+  transform-origin: 50% 50%;
+}
+.fire,
+.fire-inner {
+  transform-origin: 50% 100%;
+}
+.jaw {
+  transform-origin: 50% 0%;
+}
+.pupil,
+.shadow,
+.spark {
+  transform-origin: 50% 50%;
+}
+
+/* ---------- Idle (default state) ---------- */
+
+.float {
+  animation: float 3.4s ease-in-out infinite;
+}
+.shadow {
+  animation: shadow 3.4s ease-in-out infinite;
+}
+.fire {
+  animation: flicker 1.2s ease-in-out infinite;
+}
+.fire-inner {
+  animation: flicker 0.9s ease-in-out infinite reverse;
+}
+.jaw {
+  animation: jaw-twitch 4s ease-in-out infinite;
+}
+.pupil {
+  animation: pulse 2.2s ease-in-out infinite;
+}
+
+.spark {
+  opacity: 0;
+  filter: drop-shadow(0 0 2px rgba(46, 196, 214, 0.9));
+  animation: spark 1.6s ease-out infinite;
+}
+
+/* ---------- Keyframes ---------- */
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-9px);
+  }
+}
+
+/* The shadow shrinks and fades as he floats up. */
+@keyframes shadow {
+  0%,
+  100% {
+    transform: scaleX(1);
+    opacity: 0.14;
+  }
+  50% {
+    transform: scaleX(0.85);
+    opacity: 0.08;
+  }
+}
+
+@keyframes flicker {
+  0%,
+  100% {
+    transform: scaleY(1) skewX(0);
+  }
+  33% {
+    transform: scaleY(1.03) skewX(-1.5deg);
+  }
+  66% {
+    transform: scaleY(0.98) skewX(1.5deg);
+  }
+}
+
+@keyframes jaw-twitch {
+  0%,
+  88%,
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+  92% {
+    transform: translateY(6px) rotate(3deg);
+  }
+  96% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.25);
+  }
+}
+
+/* Each spark gets its own duration, delay and drift (--dx) from fire.ts. */
+@keyframes spark {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.6);
+  }
+  12% {
+    opacity: 1;
+    transform: translate(0, -6px) scale(1.2);
+  }
+  35% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--dx), -60px) scale(0.2);
+  }
+}
+
+/* ---------- Moods: vibing, sleepy, thinking ---------- */
+
+/* Vibing: bounces to the beat, fire surges, jaw chatters */
+.mood-vibing .float {
+  animation: bop 0.5s ease-in-out infinite;
+}
+.mood-vibing .fire {
+  animation: flame-beat 0.5s ease-in-out infinite;
+}
+.mood-vibing .fire-inner {
+  animation: flame-beat 0.5s ease-in-out infinite reverse;
+}
+.mood-vibing .jaw {
+  animation: clack 0.5s ease-in-out infinite;
+}
+.mood-vibing .pupil {
+  animation: pulse-big 0.5s ease-in-out infinite;
+}
+.mood-vibing .lean,
+.mood-vibing .eyes {
+  animation: glow 0.5s ease-in-out infinite;
+}
+.mood-vibing .spark {
+  animation-name: spark-fast;
+}
+
+/* Sleepy: sinks low, fire shrinks to embers, eyes become dim slits */
+.mood-sleepy .float {
+  animation: sink 5s ease-in-out infinite;
+}
+.mood-sleepy .fire,
+.mood-sleepy .fire-inner {
+  animation: embers 5s ease-in-out infinite;
+}
+.mood-sleepy .pupil {
+  animation: none;
+  transform: scaleY(0.2);
+  opacity: 0.55;
+}
+.mood-sleepy .jaw {
+  animation: none;
+  transform: translateY(4px) rotate(4deg);
+}
+.mood-sleepy .spark {
+  animation: none;
+  opacity: 0;
+}
+
+/* Thinking: tilts and ponders, eyes drift upward, fire swirls small */
+.mood-thinking .float {
+  animation: ponder 3s ease-in-out infinite;
+}
+.mood-thinking .eyes {
+  animation: look-up 3s ease-in-out infinite;
+}
+.mood-thinking .fire {
+  animation: swirl 2s ease-in-out infinite;
+}
+.mood-thinking .fire-inner {
+  animation: swirl 1.6s ease-in-out infinite reverse;
+}
+.mood-thinking .jaw {
+  animation: none;
+}
+.mood-thinking .spark {
+  animation: none;
+  opacity: 0;
+}
+
+.eyes {
+  transform-origin: 50% 50%;
+}
+
+@keyframes bop {
+  0%,
+  100% {
+    transform: translateY(0) scale(1.04, 0.96);
+  }
+  50% {
+    transform: translateY(-14px) scale(0.98, 1.03);
+  }
+}
+
+@keyframes flame-beat {
+  0%,
+  100% {
+    transform: scaleY(0.9) skewX(-6deg);
+  }
+  50% {
+    transform: scaleY(1.25) skewX(6deg);
+  }
+}
+
+@keyframes clack {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(8px) rotate(-3deg);
+  }
+}
+
+@keyframes pulse-big {
+  0%,
+  100% {
+    transform: scale(0.9);
+  }
+  50% {
+    transform: scale(1.45);
+  }
+}
+
+@keyframes glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 0 rgba(46, 196, 214, 0));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(46, 196, 214, 0.95));
+  }
+}
+
+@keyframes spark-fast {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.7);
+  }
+  10% {
+    opacity: 1;
+    transform: translate(0, -8px) scale(1.4);
+  }
+  40% {
+    opacity: 0.6;
+  }
+  55% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--dx), -90px) scale(0.2);
+  }
+}
+
+@keyframes sink {
+  0%,
+  100% {
+    transform: translateY(16px);
+  }
+  50% {
+    transform: translateY(20px);
+  }
+}
+
+@keyframes embers {
+  0%,
+  100% {
+    transform: scale(0.8, 0.35);
+  }
+  50% {
+    transform: scale(0.82, 0.45);
+  }
+}
+
+@keyframes ponder {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-7deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(-4deg);
+  }
+}
+
+@keyframes look-up {
+  0%,
+  100% {
+    transform: translate(-4px, -6px);
+  }
+  50% {
+    transform: translate(5px, -7px);
+  }
+}
+
+@keyframes swirl {
+  0%,
+  100% {
+    transform: scale(0.85, 0.8) skewX(-12deg);
+  }
+  50% {
+    transform: scale(0.85, 0.9) skewX(12deg);
+  }
+}
+
+/* ---------- Moods: confused, happy, raging ---------- */
+
+/* Confused: head tilt, mismatched eyes, sputtering fire */
+.mood-confused .float {
+  animation: tilt 2.6s ease-in-out infinite;
+}
+.mood-confused .pupil-l {
+  animation: none;
+  transform: scale(1.45);
+}
+.mood-confused .pupil-r {
+  animation: none;
+  transform: scale(0.65);
+}
+.mood-confused .fire {
+  animation: sputter 1.3s linear infinite;
+}
+.mood-confused .fire-inner {
+  animation: sputter 1.1s linear infinite reverse;
+}
+.mood-confused .jaw {
+  animation: none;
+  transform: translateX(4px) rotate(-5deg);
+}
+
+/* Happy: full backflip, fire bursts, eyes go wide */
+.mood-happy .float {
+  animation: flip 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+.mood-happy .fire {
+  animation: flame-beat 0.4s ease-in-out infinite;
+}
+.mood-happy .fire-inner {
+  animation: flame-beat 0.4s ease-in-out infinite reverse;
+}
+.mood-happy .pupil {
+  animation: none;
+  transform: scale(1.4);
+}
+.mood-happy .jaw {
+  animation: clack 0.4s ease-in-out infinite;
+}
+.mood-happy .lean,
+.mood-happy .eyes {
+  animation: glow 0.4s ease-in-out infinite;
+}
+.mood-happy .spark {
+  animation-name: spark-fast;
+}
+
+/* Raging: fire turns hot orange and roars, eyes narrow, teeth grind */
+.mood-raging .float {
+  animation: shake 0.18s linear infinite;
+}
+.mood-raging .fire {
+  animation: flame-beat 0.3s ease-in-out infinite;
+}
+.mood-raging .fire-inner {
+  animation: flame-beat 0.3s ease-in-out infinite reverse;
+}
+.mood-raging .flame-main,
+.mood-raging .flame-halo {
+  fill: #ff7a45;
+}
+.mood-raging .flame-inner {
+  fill: #ffd6a5;
+}
+.mood-raging .pupil {
+  animation: none;
+  transform: scaleY(0.45);
+}
+.mood-raging .pupil circle {
+  fill: #ff7a45;
+}
+.mood-raging .jaw {
+  animation: grind 0.3s linear infinite;
+}
+.mood-raging .spark {
+  animation-name: spark-fast;
+  fill: #ffb27a;
+  filter: drop-shadow(0 0 2px rgba(255, 122, 69, 0.9));
+}
+
+/* Smooth colour change into and out of rage */
+.flame-main,
+.flame-halo,
+.flame-inner,
+.pupil circle,
+.spark {
+  transition: fill 0.3s;
+}
+
+@keyframes tilt {
+  0%,
+  100% {
+    transform: rotate(12deg);
+  }
+  45% {
+    transform: rotate(15deg);
+  }
+  55% {
+    transform: rotate(9deg) translateY(-6px);
+  }
+}
+
+@keyframes sputter {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  12% {
+    transform: scaleY(0.5);
+  }
+  20% {
+    transform: scaleY(1.1);
+  }
+  48% {
+    transform: scaleY(0.9);
+  }
+  55% {
+    transform: scaleY(0.4);
+  }
+  62% {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes flip {
+  0%,
+  55%,
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+  70% {
+    transform: translateY(-30px) rotate(180deg);
+  }
+  85% {
+    transform: translateY(-10px) rotate(360deg);
+  }
+  92% {
+    transform: translateY(0) rotate(360deg) scale(1.08, 0.92);
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-3px, 1px);
+  }
+  50% {
+    transform: translate(2px, -2px);
+  }
+  75% {
+    transform: translate(3px, 1px);
+  }
+}
+
+@keyframes grind {
+  0%,
+  100% {
+    transform: translateX(-2px);
+  }
+  50% {
+    transform: translateX(2px);
+  }
+}
+
+/* ---------- Overlay: emote bubble, notes, z's, thinking dots ---------- */
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-weight: 800;
+  color: #14213d;
+}
+
+.bubble {
+  position: absolute;
+  top: 36px;
+  right: 28px;
+  min-width: 46px;
+  height: 46px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  display: none;
   align-items: center;
   justify-content: center;
-  font-family: system-ui, sans-serif;
-  font-weight: 700;
-  color: #2ec4d6;
-  cursor: grab;
+  gap: 6px;
+  background: #ffffff;
+  border: 3px solid #14213d;
+  border-radius: 23px;
+  box-shadow: 3px 3px 0 #14213d;
+  font-size: 22px;
+}
+
+#emote.show,
+.mood-thinking .thinking-dots {
+  display: flex;
+  animation: pop 0.45s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+
+.thinking-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #14213d;
+  animation: dot 1.2s ease-in-out infinite;
+}
+.thinking-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.thinking-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+.note,
+.zz {
+  position: absolute;
+  display: none;
+  animation: rise 2s ease-out infinite;
+}
+
+.note {
+  font-size: 26px;
+  color: #0b6e7c;
+}
+.n1 {
+  left: 54px;
+  top: 190px;
+}
+.n2 {
+  right: 50px;
+  top: 220px;
+  animation-delay: 0.7s;
+}
+.n3 {
+  left: 84px;
+  top: 130px;
+  animation-delay: 1.3s;
+  font-size: 20px;
+}
+
+.zz {
+  animation-duration: 3s;
+}
+.z1 {
+  right: 110px;
+  top: 150px;
+  font-size: 20px;
+}
+.z2 {
+  right: 88px;
+  top: 124px;
+  font-size: 26px;
+  animation-delay: 1s;
+}
+.z3 {
+  right: 64px;
+  top: 94px;
+  font-size: 32px;
+  animation-delay: 2s;
+}
+
+.mood-vibing .note,
+.mood-sleepy .zz {
+  display: block;
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(0.2);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes dot {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes rise {
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-48px);
+  }
+}
+
+/* ---------- Summon: magic circle → beam → Merlin pops in → fire ignites ---------- */
+
+/* The circle's flattening transform must use plain SVG coordinates. */
+#merlin .flat {
+  transform-box: view-box;
+  transform-origin: 0 0;
+}
+
+.magic-circle,
+.beam,
+.rise,
+.ring {
+  opacity: 0;
+}
+
+.magic-circle {
+  transform-origin: 50% 50%;
+  filter: drop-shadow(0 0 6px rgba(46, 196, 214, 0.8));
+}
+.circle-spin {
+  transform-origin: 50% 50%;
+  animation: spin 6s linear infinite;
+}
+.beam {
+  transform-origin: 50% 100%;
+}
+.ring {
+  transform-origin: 50% 50%;
+}
+
+.mood-summon .magic-circle {
+  animation: circle-in 3.6s ease-in-out both;
+}
+.mood-summon .circle-spin {
+  animation-duration: 2.4s;
+}
+.mood-summon .circle-draw {
+  stroke-dasharray: 380;
+  animation: draw 3.6s ease-out both;
+}
+.mood-summon .beam {
+  animation: beam 3.6s ease-out both;
+}
+.mood-summon .rise {
+  animation: rise-up 3.6s ease-out both;
+}
+.mood-summon .r2 {
+  animation-delay: 0.15s;
+}
+.mood-summon .r3 {
+  animation-delay: 0.3s;
+}
+.mood-summon .r4 {
+  animation-delay: 0.45s;
+}
+.mood-summon .float {
+  animation: summon-pop 3.6s cubic-bezier(0.3, 1.3, 0.5, 1) both;
+}
+.mood-summon .shadow {
+  animation: shadow-in 3.6s ease-out both;
+}
+.mood-summon .fire,
+.mood-summon .fire-inner {
+  animation: ignite 3.6s ease-out both;
+}
+.mood-summon .ring {
+  animation: ring 3.6s ease-out both;
+}
+.mood-summon .spark {
+  animation: none;
+  opacity: 0;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes circle-in {
+  0% {
+    transform: scale(0.1);
+    opacity: 0;
+  }
+  12% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+  18% {
+    transform: scale(1);
+  }
+  62% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  80%,
+  100% {
+    transform: scale(1.25);
+    opacity: 0;
+  }
+}
+
+@keyframes draw {
+  0% {
+    stroke-dashoffset: 380;
+  }
+  20%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes beam {
+  0%,
+  16% {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+  28% {
+    transform: scaleY(1);
+    opacity: 0.9;
+  }
+  42% {
+    opacity: 0.7;
+  }
+  56%,
+  100% {
+    transform: scaleY(1.05);
+    opacity: 0;
+  }
+}
+
+@keyframes rise-up {
+  0%,
+  14% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    transform: translateY(-120px);
+    opacity: 0;
+  }
+}
+
+@keyframes summon-pop {
+  0%,
+  28% {
+    transform: translateY(-10px) scale(0.2);
+    opacity: 0;
+  }
+  34% {
+    opacity: 1;
+  }
+  42% {
+    transform: translateY(-6px) scale(1.14);
+    opacity: 1;
+  }
+  49% {
+    transform: translateY(2px) scale(0.94, 1.04);
+  }
+  56%,
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes shadow-in {
+  0%,
+  30% {
+    transform: scale(0);
+  }
+  44% {
+    transform: scale(1.15);
+  }
+  52%,
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes ignite {
+  0%,
+  40% {
+    transform: scale(0, 0);
+  }
+  50% {
+    transform: scale(1.15, 1.4);
+  }
+  58% {
+    transform: scale(0.95, 0.9);
+  }
+  64%,
+  100% {
+    transform: scale(1, 1);
+  }
+}
+
+@keyframes ring {
+  0%,
+  44% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  48% {
+    opacity: 1;
+  }
+  68%,
+  100% {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+}
+
+/* ---------- Despawn: circle returns → fire snuffs out → he sinks into it ---------- */
+
+.mood-despawn .magic-circle {
+  animation: circle-out 2.4s ease-in-out both;
+}
+.mood-despawn .circle-spin {
+  animation-duration: 2.4s;
+}
+.mood-despawn .circle-draw {
+  stroke-dasharray: 380;
+  animation: draw-out 2.4s ease-out both;
+}
+.mood-despawn .fire,
+.mood-despawn .fire-inner {
+  animation: snuff 2.4s ease-in both;
+}
+.mood-despawn .float {
+  animation: sink-away 2.4s ease-in both;
+}
+.mood-despawn .shadow {
+  animation: shadow-out 2.4s ease-in both;
+}
+.mood-despawn .spark {
+  animation: none;
+  opacity: 0;
+}
+
+@keyframes circle-out {
+  0% {
+    transform: scale(0.1);
+    opacity: 0;
+  }
+  15% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  22%,
+  75% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.2);
+    opacity: 0;
+  }
+}
+
+@keyframes draw-out {
+  0% {
+    stroke-dashoffset: 380;
+  }
+  22%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes snuff {
+  0%,
+  25% {
+    transform: scale(1, 1);
+  }
+  33% {
+    transform: scale(1.1, 1.25);
+  }
+  45%,
+  100% {
+    transform: scale(0, 0);
+  }
+}
+
+@keyframes sink-away {
+  0%,
+  45% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  52% {
+    transform: translateY(-8px) scale(1.06, 0.94);
+    opacity: 1;
+  }
+  75%,
+  100% {
+    transform: translateY(70px) scale(0.2, 0.05);
+    opacity: 0;
+  }
+}
+
+@keyframes shadow-out {
+  0%,
+  50% {
+    transform: scale(1);
+  }
+  75%,
+  100% {
+    transform: scale(0);
+  }
+}
+
+/* ---------- Startled, flying and dizzy (dragging and throwing) ---------- */
+
+/* His fire leans from its base; drag.ts sets the angle. */
+#merlin .lean {
+  transform-origin: 50% 100%;
+  transition: transform 0.5s cubic-bezier(0.3, 1.9, 0.45, 1);
+}
+.mood-flying #merlin .lean {
+  transition-duration: 0.12s;
+}
+
+/* Startled: jaw drops, fire shoots straight up, eyes shrink, he shakes */
+.mood-startled .float {
+  animation: shake 0.12s linear infinite;
+}
+.mood-startled .fire,
+.mood-startled .fire-inner {
+  animation: none;
+  transform: scaleY(1.35);
+}
+.mood-startled .jaw {
+  animation: none;
+  transform: translateY(16px);
+}
+.mood-startled .pupil {
+  animation: none;
+  transform: scale(0.5);
+}
+
+/* Flying: mouth open, tiny eyes, fire roaring */
+.mood-flying .float {
+  animation: none;
+}
+.mood-flying .jaw {
+  animation: none;
+  transform: translateY(10px);
+}
+.mood-flying .pupil {
+  animation: none;
+  transform: scale(0.6);
+}
+.mood-flying .fire {
+  animation: flame-beat 0.3s ease-in-out infinite;
+}
+
+/* Dizzy: wobbles, eyes spin in circles, fire sloshes, stars orbit */
+.stars {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.stars-spin {
+  transform-origin: 50% 50%;
+  animation: spin 1.4s linear infinite;
+}
+.mood-dizzy .stars {
+  opacity: 1;
+}
+.mood-dizzy .float {
+  animation: wobble 1.2s ease-in-out infinite;
+}
+.mood-dizzy .pupil {
+  animation: orbit 0.6s linear infinite;
+}
+.mood-dizzy .pupil-r {
+  animation-direction: reverse;
+}
+.mood-dizzy .jaw {
+  animation: none;
+  transform: translateY(5px) rotate(6deg);
+}
+.mood-dizzy .fire {
+  animation: slosh 1.2s ease-in-out infinite;
+}
+
+@keyframes wobble {
+  0%,
+  100% {
+    transform: rotate(-10deg) translateX(-6px);
+  }
+  50% {
+    transform: rotate(10deg) translateX(6px);
+  }
+}
+
+/* Moves each pupil around a small circle without rotating it. */
+@keyframes orbit {
+  from {
+    transform: rotate(0deg) translateX(4px) rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg) translateX(4px) rotate(-360deg);
+  }
+}
+
+@keyframes slosh {
+  0%,
+  100% {
+    transform: skewX(14deg) scaleY(0.9);
+  }
+  50% {
+    transform: skewX(-14deg) scaleY(0.9);
+  }
+}
+
+/* ---------- Eyes follow the cursor (cursor.ts sets the offset) ---------- */
+.eye-track {
+  transition: transform 0.12s ease-out;
+}
+
+/* ---------- Click-through: only Merlin's body catches the mouse ---------- */
+.shadow,
+.flat,
+.beam,
+.rise,
+.ring,
+#sparks {
+  pointer-events: none;
+}
+
+/* ---------- Chat: speech bubble and input ---------- */
+
+.chat {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  color: #14213d;
+}
+
+.speech {
+  position: absolute;
+  top: 6px;
+  left: 14px;
+  right: 14px;
+  margin: 0;
+  max-height: 150px;
+  overflow-y: auto;
+  padding: 12px 14px;
+  background: #ffffff;
+  border: 3px solid #14213d;
+  border-radius: 16px;
+  box-shadow: 4px 4px 0 #14213d;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.45;
+  display: none;
+  pointer-events: auto;
+  transform-origin: 50% 100%;
+  z-index: 10;
+}
+
+.speech.show {
+  display: block;
+  animation: pop 0.45s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+
+.chat-form {
+  position: absolute;
+  left: 50px;
+  right: 50px;
+  bottom: 6px;
+  display: none;
+  pointer-events: auto;
+  z-index: 10;
+}
+
+.chat-form.show {
+  display: block;
+  animation: pop 0.3s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+
+.chat-form input {
+  width: 100%;
+  height: 38px;
+  box-sizing: border-box;
+  padding: 0 14px;
+  border: 3px solid #14213d;
+  border-radius: 19px;
+  background: #ffffff;
+  color: #14213d;
+  font:
+    500 14px "Segoe UI",
+    system-ui,
+    sans-serif;
+  box-shadow: 3px 3px 0 #14213d;
+  outline: none;
+}
+
+.chat-form input:focus {
+  border-color: #0b6e7c;
+}
+
+/* ---------- Talking: jaw flaps in uneven, speech-like beats ---------- */
+
+.mood-talking .float {
+  animation: float 2.4s ease-in-out infinite;
+}
+.mood-talking .jaw {
+  animation: talk 1.1s steps(1, end) infinite;
+}
+.mood-talking .pupil {
+  animation: pulse 1.1s ease-in-out infinite;
+}
+
+@keyframes talk {
+  0% {
+    transform: translateY(9px);
+  }
+  14% {
+    transform: translateY(2px);
+  }
+  26% {
+    transform: translateY(12px);
+  }
+  40% {
+    transform: translateY(0);
+  }
+  52% {
+    transform: translateY(7px);
+  }
+  66% {
+    transform: translateY(3px);
+  }
+  78% {
+    transform: translateY(10px);
+  }
+  90% {
+    transform: translateY(0);
+  }
 }

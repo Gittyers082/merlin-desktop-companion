@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "merlin-desktop-pet",
+  "productName": "Merlin",
   "version": "0.1.0",
   "identifier": "com.gittyers082.merlin",
   "build": {
@@ -13,6 +13,7 @@
     "withGlobalTauri": true,
     "windows": [
       {
+        "label": "main",
         "title": "Merlin",
         "width": 420,
         "height": 480,
@@ -22,6 +23,16 @@
         "skipTaskbar": true,
         "resizable": false,
         "shadow": false,
+        "center": true
+      },
+      {
+        "label": "settings",
+        "title": "Merlin — Settings",
+        "url": "settings.html",
+        "width": 460,
+        "height": 720,
+        "resizable": false,
+        "visible": false,
         "center": true
       }
     ],
