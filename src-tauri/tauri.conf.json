@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "merlin-desktop-pet",
+  "productName": "Merlin",
   "version": "0.1.0",
   "identifier": "com.gittyers082.merlin",
   "build": {
